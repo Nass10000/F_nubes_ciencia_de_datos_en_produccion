@@ -1,0 +1,48 @@
+{
+  "target": "churn",
+  "best_model": "logistic_regression",
+  "numerical_columns": [
+    "signup_month",
+    "age",
+    "tenure_months",
+    "sessions_week",
+    "avg_session_min",
+    "notif_click_rate",
+    "support_tickets_3m",
+    "discount_pct_3m",
+    "late_payments_6m",
+    "auto_renew",
+    "engagement_minutes_week",
+    "tickets_per_tenure",
+    "late_payment_flag",
+    "high_discount_flag",
+    "early_tenure_flag",
+    "low_engagement_flag"
+  ],
+  "categorical_columns": [
+    "region",
+    "channel",
+    "plan"
+  ],
+  "input_columns": [
+    "signup_month",
+    "age",
+    "tenure_months",
+    "sessions_week",
+    "avg_session_min",
+    "notif_click_rate",
+    "support_tickets_3m",
+    "discount_pct_3m",
+    "late_payments_6m",
+    "auto_renew",
+    "engagement_minutes_week",
+    "tickets_per_tenure",
+    "late_payment_flag",
+    "high_discount_flag",
+    "early_tenure_flag",
+    "low_engagement_flag",
+    "region",
+    "channel",
+    "plan"
+  ]
+}
