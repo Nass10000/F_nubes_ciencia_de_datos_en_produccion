@@ -1,0 +1,494 @@
+Lecture 6: V2DSM5L6 | Introducción al MLOps
+Modulo: Fundamentos de nube y ciencia de datos de producción
+SCORM: https://capsulasv2.soyhenry.com/scorm/a51495bf-cc61-4f50-99af-3657912ed6be/scormcontent/index.html
+
+================================================================================
+Inicio [section]
+================================================================================
+Introducción [blocks]
+================================================================================
+  ¡Bienvenidos!
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  ¡Bienvenidos/as a la lecture: Introducción al MLOps! 😎
+Cada vez más empresas apuestan por el uso de modelos de machine learning para resolver problemas complejos, automatizar decisiones y generar valor a partir de datos. Sin embargo, entrenar un modelo no es el final del camino: es apenas el comienzo.
+El verdadero desafío surge cuando queremos llevar ese modelo a producción,
+mantenerlo operativo, actualizarlo sin interrupciones y garantizar que siga funcionando correctamente a medida que cambian los datos o el entorno.
+En ese punto entra en juego
+MLOps
+, una disciplina que combina las buenas prácticas de DevOps con los requerimientos propios del aprendizaje automático.
+En esta clase vas a conocer los fundamentos de MLOps, un enfoque que une buenas prácticas de desarrollo de software (DevOps) con los desafíos específicos del machine learning. Vas a aprender por qué es clave para lograr soluciones reales, confiables y sostenibles en entornos productivos.
+Pero no nos vamos a quedar solo en la teoría. A partir del caso de FitPredict, una startup de fitness que necesita poner su modelo en línea, vas a ver cómo se diseña una arquitectura completa de ML, qué herramientas se pueden usar y cómo se implementan estrategias de despliegue en la nube usando AWS.
+Al finalizar la clase, tendrás una visión práctica de cómo transformar un modelo entrenado en un
+servicio real, automatizado y confiable
+, listo para integrarse con aplicaciones del mundo real.
+¡Éxitos! 🚀
+
+  Objetivos de la lección
+💥
+
+  Comprender los principios fundamentales de MLOps, analizando sus beneficios, etapas y diferencias con DevOps para optimizar la operación y mantenimiento de modelos de machine learning.
+  Diseñar la arquitectura de una solución de ML, seleccionando herramientas y tecnologías adecuadas para garantizar escalabilidad, trazabilidad y eficiencia en el desarrollo.
+  Conocer estrategias de despliegue en AWS, explorando la disponibilidad de modelos mediante S3, contenedorización con ECR y ECS, y el despliegue de APIs con AWS Lambda.
+
+  Caso integrador
+
+  FitPredict: Llevando modelos de ML al mundo real
+
+  Imagina que formas parte del equipo técnico de 🧠⚙️
+FitPredict
+, una startup tecnológica que desarrolla soluciones de machine learning para el mundo del fitness y la salud. Su producto principal es una app que permite a los usuarios seguir rutinas personalizadas, registrar sus entrenamientos y recibir recomendaciones basadas en datos. Pero como ocurre en muchas apps, mantener el compromiso de los usuarios es un gran desafío.
+Después de analizar su base de datos, el equipo de ciencia de datos desarrolló un modelo que predice con alta probabilidad si un usuario va a abandonar la app (churn) en los próximos 30 días. Este modelo fue entrenado offline, validado internamente y funciona muy bien... en notebooks de Jupyter.
+Ahora, el desafío real comienza:
+¿cómo hacemos para llevar este modelo a producción?
+Es decir, ¿cómo logramos que este modelo forme parte del sistema real, que esté disponible para la app móvil y que pueda escalar a miles de usuarios? Ahí es donde entra tu participación.
+La empresa necesita que, como
+Machine Learning Engineer
+, diseñes y construyas un flujo de trabajo completo para poner ese modelo en producción. Para lograrlo, vas a tener que:
+
+  Aplicar buenas prácticas de MLOps para que el modelo pueda ser versionado, monitoreado y actualizado.
+  Diseñar una arquitectura modular y escalable, que combine almacenamiento, procesamiento y despliegue.
+  Implementar una API REST que exponga el modelo y permita que la app la consulte en tiempo real.
+  Hacer todo esto en la nube, aprovechando servicios de AWS como S3, ECR, ECS y Lambda.
+  Garantizar que los recursos utilizados no generen costos innecesarios.
+
+  Veamos el ejemplo
+
+  En el siguiente video introduciremos el caso integrador de la lecture.
+
+  [recurso] DS_M5L6-V1
+  https://vimeo.com/1167816489/c6631de01f
+
+  👩🏽‍💻Archivos necesarios
+
+  Dataset
+  AQUÍ
+  [enlace] https://drive.google.com/drive/folders/14LRux3RVblG6akvEgH17YSuxbd0qPFYh?usp=drive_link
+
+  SIGUIENTE
+
+================================================================================
+Desarollo [section]
+================================================================================
+Introducción del MLOps [blocks]
+================================================================================
+  🔎 Qué es MLOps y su relación con el ciclo de vida del ML
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  🤖
+COmpletar desde aca!
+  MLOps
+es un enfoque que combina principios de machine learning con prácticas operativas inspiradas en DevOps, orientadas a la gestión integral y sistemática del ciclo de vida de los modelos.
+Su alcance va mucho más allá del entrenamiento: abarca desde la preparación de los datos hasta el monitoreo y mantenimiento en producción. Su principal aporte radica en facilitar procesos repetibles, escalables y trazables, garantizando que los modelos de aprendizaje automático no solo funcionen en entornos de desarrollo, sino que puedan sostenerse con calidad y confiabilidad en escenarios reales.
+MLOps formaliza la transición entre la experimentación y la operación, integrando herramientas que automatizan tareas críticas y reducen la dependencia de procesos manuales.
+La adopción de MLOps exige una
+visión integral del ciclo de vida del machine learning
+. Este ciclo incluye etapas que van desde la obtención y procesamiento de datos, el entrenamiento y evaluación del modelo, hasta su despliegue, monitoreo y reentrenamiento continuo. Cada una de estas etapas debe ser abordada con mecanismos de control que aseguren consistencia entre versiones, reproducibilidad de resultados y estabilidad en la operación. MLOps organiza estas fases como un flujo orquestado de trabajo, en el que cada salida se convierte en una entrada controlada para el siguiente paso. Esta estructuración permite mantener el valor técnico del modelo sin degradación en su desempeño operativo.
+Uno de los aportes más relevantes de MLOps es la
+automatización de tareas
+que tradicionalmente requerían intervención manual. Actividades como la validación de datasets, la ejecución de experimentos, la comparación de métricas, el registro de modelos, su despliegue, monitoreo e incluso el redeployment ante cambios en los datos pueden orquestarse mediante pipelines. Estos flujos permiten reducir errores, acortar los tiempos de entrega y garantizar que cada modelo en producción sea el resultado de un proceso validado, auditable y repetible. La combinación de automatización y control contribuye a consolidar un entorno productivo robusto.
+Por último, MLOps propone una filosofía de
+trabajo colaborativo y estandarizado entre equipos técnicos
+que, en contextos tradicionales, operaban de forma fragmentada. Su implementación requiere definir convenciones, seleccionar herramientas compatibles y establecer métricas comunes de calidad. De esta manera, cada actor involucrado en el ciclo de vida del modelo —desde la recolección de datos hasta la operación en producción— puede interactuar de forma coordinada dentro de un sistema controlado. Esta integración operacional es indispensable cuando se busca convertir soluciones de machine learning en productos reales, mantenibles y alineados con objetivos de negocio.
+🧠⚙️
+En el caso de
+FitPredict
+, el equipo técnico enfrentaba el desafío de transformar un modelo funcional en un servicio disponible y confiable dentro de su arquitectura digital. Comprender qué es MLOps y cómo se relaciona con cada etapa del ciclo de vida del modelo les permitió estructurar un proceso ordenado, versionable y replicable que habilita la transición desde la investigación hacia la operación en producción, con una base técnica sólida para escalar en el tiempo.
+
+  Problemáticas que resuelve
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  ✅
+Reproducibilidad, escalabilidad y automatización
+✅
+
+  Reproducibilidad
+  Una de las principales problemáticas que MLOps resuelve es la
+reproducibilidad
+. Sin mecanismos que garanticen que un modelo puede ser regenerado exactamente bajo las mismas condiciones —mismo código, datos y parámetros— cualquier resultado es frágil y difícil de validar.
+En entornos productivos, la trazabilidad de los datos, del código y de los experimentos es esencial para asegurar que las decisiones automatizadas se basan en procesos verificables. MLOps incorpora herramientas y prácticas que permiten
+versionar cada componente del flujo de trabajo,
+haciendo posible reconstruir un modelo en cualquier momento del ciclo de vida con total transparencia y confiabilidad.
+  Escalabilidad
+  La escalabilidad es otro eje crítico que MLOps aborda. Un modelo que funciona bien en un entorno local o controlado puede fallar ante grandes volúmenes de datos, múltiples solicitudes simultáneas o demandas de baja latencia.
+MLOps permite integrar el modelo en arquitecturas distribuidas, contenerizadas y adaptadas a la nube, donde puede escalar según la demanda. Esto es especialmente relevante para productos digitales que exponen inferencias en tiempo real y no pueden permitirse tiempos de espera prolongados
+ni interrupciones de servicio
+.
+  Automatización
+  La automatización es un pilar estructural de MLOps que reduce los cuellos de botella operativos. Actividades como el despliegue de nuevos modelos, la actualización periódica de parámetros, la validación automática de datasets o el monitoreo continuo de métricas pueden integrarse en pipelines.
+Esta automatización evita la intervención manual en tareas repetitivas, minimiza el margen de error y acelera la velocidad de respuesta ante cambios en los datos o condiciones externas. Además, asegura consistencia y auditabilidad del sistema, facilitando la gobernanza técnica y el control de calidad en todo momento.
+
+  Estas problemáticas —reproducibilidad, escalabilidad y automatización— no son independientes entre sí. Están interconectadas
+en la operación real de modelos en producción, y su resolución conjunta permite establecer un entorno técnico maduro, donde los modelos no solo entregan valor en una etapa puntual, sino que pueden sostener ese valor de forma continua. MLOps actúa como el marco operativo que integra estas soluciones y las convierte en procesos estructurales dentro de la organización.
+
+  🤖
+COmpletar desde aca!
+  🧠⚙️
+En el proceso de llevar su modelo de churn a la nube,
+FitPredict
+enfrentó limitaciones técnicas que impedían replicar el modelo en diferentes entornos, responder a la carga real de usuarios y actualizarlo con facilidad. Aplicar prácticas de MLOps les permitió resolver de manera integrada estas tres problemáticas, asegurando que el modelo pudiera ser regenerado, escalado y automatizado en una arquitectura de producción confiable.
+
+  Roles involucrados
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  El desarrollo y operación de modelos de machine learning en entornos reales requieren la participación coordinada de múltiples perfiles técnicos,
+cada uno con funciones específicas pero complementarias
+dentro del flujo MLOps.
+
+  Data Scientist
+  El Data Scientist es responsable de construir el modelo, seleccionar algoritmos, analizar métricas y garantizar que las decisiones aprendidas sean válidas desde el punto de vista estadístico. Su trabajo se enfoca principalmente en la exploración de datos, la experimentación y la validación técnica del modelo dentro de entornos controlados.
+  ML Engineer
+  El ML Engineer se encarga de operacionalizar ese modelo, es decir, de convertirlo en un artefacto ejecutable dentro de un sistema de software. Esta responsabilidad implica diseñar el empaquetado del modelo, definir los endpoints, automatizar flujos de entrenamiento y despliegue, así como garantizar que las salidas del modelo sean consumibles desde otras aplicaciones. Este rol actúa como puente entre el entorno experimental y el productivo, asegurando que lo construido pueda sostenerse técnicamente en operación.
+  DevOps Engineer
+  El rol del DevOps Engineer se enfoca en la infraestructura que habilita la operación continua de los modelos. Sus funciones incluyen la gestión del entorno en la nube, la implementación de pipelines de integración y despliegue continuo, el monitoreo del sistema y la optimización de recursos. En el marco de MLOps, su aporte se vuelve esencial para que los modelos no solo estén disponibles, sino que lo estén de forma segura, escalable y automatizada, con mecanismos de alerta, auditoría y recuperación ante fallas.
+
+  La colaboración entre estos tres perfiles requiere coordinación, estandarización de procesos y uso compartido de herramientas.
+Un flujo MLOps efectivo depende de la definición clara de responsabilidades, la adopción de plataformas que integren etapas del ciclo de vida y la construcción de una cultura técnica basada en la automatización, la observabilidad y la mejora continua. Cada rol aporta una perspectiva complementaria que, al integrarse, permite operar soluciones de ML con calidad industrial.
+🧠⚙️
+En el equipo de
+FitPredict
+, la implementación de MLOps fue posible gracias a la articulación entre quienes desarrollaron el modelo, quienes lo transformaron en una API, y quienes diseñaron la infraestructura de ejecución y despliegue. Esta colaboración interdisciplinaria permitió que el modelo de churn dejara de ser un experimento local para convertirse en un componente operativo integrado a la plataforma del producto digital.
+
+  SIGUIENTE
+
+================================================================================
+Beneficios, etapas y comparación con DevOps [blocks]
+================================================================================
+  DevOps vs. MLOps
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  🤖
+COmpletar desde aca!
+  DevOps y MLOps
+comparten un enfoque:
+ambos buscan automatizar procesos, integrar equipos y acelerar la entrega continua de soluciones confiables.
+DevOps se enfoca en el ciclo de vida del software tradicional: versionado de código, pruebas, despliegue y monitoreo de servicios. En cambio, MLOps incorpora componentes adicionales como datasets, experimentos, métricas de validación y modelos entrenados que deben ser gestionados con la misma rigurosidad que el código. La diferencia conceptual principal es que el objeto que se entrega y mantiene en producción no es solo software, sino un modelo predictivo que puede degradarse con el tiempo.
+Desde una perspectiva práctica, DevOps se apoya en herramientas y flujos orientados a código fuente y microservicios, mientras que MLOps requiere pipelines que integren procesos como la validación de datos, el entrenamiento de modelos, el registro de resultados y el redeployment ante cambios. DevOps prioriza la estabilidad y disponibilidad continua del sistema, mientras que MLOps debe además monitorear el rendimiento del modelo en producción y responder a la deriva de datos. Esto introduce la necesidad de incorporar reentrenamiento periódico como parte de los flujos de mantenimiento, algo ajeno a la práctica DevOps tradicional.
+La colaboración entre DevOps y MLOps es necesaria, pero sus responsabilidades se articulan de forma complementaria. Mientras DevOps define y mantiene la infraestructura, la seguridad y los entornos de ejecución, MLOps se encarga de que los modelos operen correctamente dentro de esos entornos, con capacidad de ser actualizados, auditados y versionados. Esto implica compartir algunos procesos, pero también definir límites claros entre responsabilidades operativas y responsabilidades analíticas. MLOps no reemplaza a DevOps, sino que extiende su alcance al mundo de los datos y el aprendizaje automático.
+En resumen...
+
+  DevOps
+MLOps
+Enfoque principal
+Automatizar y acelerar el ciclo de vida del software tradicional.
+Automatizar y acelerar el ciclo de vida de modelos de machine learning.
+Objeto que se entrega
+Software, servicios, microservicios.
+Modelos predictivos + software asociado.
+Componentes gestionados
+Código fuente, pruebas, builds, despliegues, monitoreo.
+Datasets, experimentos, métricas, modelos entrenados, validación de datos.
+Riesgos a mitigar
+Fallas del sistema, caídas de servicios, errores de despliegue.
+Degradación del modelo, deriva de datos, pérdida de calidad predictiva.
+Procesos clave
+CI/CD, versionado, testing, despliegue continuo, monitoreo de servicios.
+Pipelines de datos, entrenamiento, registro de modelos, validación, redeployment, reentrenamiento periódico.
+Monitoreo
+Estado del sistema, disponibilidad, performance del servicio.
+Rendimiento del modelo en producción, drift de datos, métricas de inferencia.
+Herramientas típicas
+Git, Docker, Kubernetes, GitHub Actions, Jenkins, Prometheus.
+MLflow, DVC, Kubeflow, Feature Stores, herramientas de validación de datos.
+Responsabilidades centrales
+Infraestructura, seguridad, entornos de ejecución, estabilidad del sistema.
+Operacionalización del modelo, versionado de datos y modelos, orquestación de pipelines de ML.
+Relación entre ambos
+Proporciona la arquitectura y los entornos donde corre el software.
+Extiende DevOps añadiendo procesos ligados al aprendizaje automático y los datos.
+Naturaleza del ciclo de vida
+Estático: el software no cambia si no se modifica el código.
+Dinámico: los modelos pueden degradarse y requieren actualización continua.
+
+  Reconocer estas diferencias permite diseñar arquitecturas que integren ambos enfoques sin conflictos. Equipos que combinan prácticas DevOps para la operación general del sistema con prácticas MLOps para la gestión de modelos logran ciclos de entrega más ágiles y soluciones más sostenibles. La clave está en entender que cada enfoque tiene prioridades distintas: DevOps busca eficiencia en el delivery de software, mientras que MLOps busca continuidad en la calidad de las predicciones.
+🧠⚙️
+En
+FitPredict
+, esta distinción resultó clave para organizar el trabajo entre quienes gestionaban la infraestructura general del producto y quienes se encargaban de llevar el modelo de churn a producción. Al comprender que el modelo requería procesos distintos de los microservicios tradicionales, el equipo diseñó un flujo específico con lógica MLOps, sin interferir en las prácticas existentes del backend, y logró así desplegar el modelo como un componente controlado y actualizable dentro del sistema.
+
+  Principales beneficios
+  MLOps no solo introduce nuevas herramientas, también brinda una manera más eficiente y controlada de llevar modelos de machine learning al entorno productivo.
+Sus beneficios combinan velocidad operativa, confiabilidad técnica, trazabilidad total y colaboración efectiva entre equipos.
+
+  Uno de los principales beneficios que MLOps aporta es la
+velocidad
+con la que se puede llevar un modelo desde el entrenamiento hasta la producción. Al automatizar tareas como el registro de experimentos, el empaquetado del modelo y su despliegue, se reducen los tiempos de ciclo y se acorta el camino entre el descubrimiento técnico y la entrega de valor al usuario final. Esta velocidad operativa no compromete la calidad, sino que permite que los equipos sean más ágiles ante nuevas necesidades del negocio o ajustes en los datos disponibles.
+  La
+confiabilidad
+es otro valor central que MLOps promueve mediante el control de versiones y la estandarización de entornos de ejecución. Cuando cada modelo se entrena y se publica bajo condiciones controladas, con dependencias y configuraciones encapsuladas, se reducen los errores por discrepancias de entorno o por modificaciones no registradas. Esto permite que cada modelo desplegado sea reproducible y verificable, lo que aumenta la confianza en su funcionamiento y facilita auditorías técnicas.
+  La
+trazabilidad
+que se obtiene al registrar todos los pasos del ciclo de vida de un modelo es fundamental para la gestión de riesgos y la mejora continua. En un sistema con MLOps, es posible saber qué datos se usaron para entrenar un modelo, con qué parámetros, con qué código, y qué resultados produjo en validación. Esta trazabilidad no solo ayuda a entender el comportamiento del modelo, sino que permite identificar las causas de posibles desvíos o degradaciones en producción.
+  Por último, MLOps potencia la
+colaboración
+entre roles técnicos al unificar criterios, herramientas y estándares. Al trabajar sobre pipelines comunes, con repositorios compartidos, métricas registradas y herramientas de monitoreo, los equipos pueden comunicarse con mayor claridad y tomar decisiones basadas en evidencia. Esta colaboración estructurada permite escalar proyectos más allá de una sola persona, y convierte el desarrollo de modelos en una práctica colectiva, sostenible y alineada con objetivos organizacionales.
+
+  🧠⚙️ En el proceso de implementación del modelo de churn,
+FitPredict
+descubrió que los beneficios de MLOps no eran solo técnicos, sino estratégicos. La posibilidad de iterar con rapidez, registrar cada cambio, validar el comportamiento del modelo y colaborar entre equipos permitió que el modelo pasara de ser una prueba de concepto a una solución real, útil y mantenible dentro del ciclo de vida del producto.
+
+  ✅ Teniendo en cuenta lo aprendido, selecciona la respuesta correcta:
+
+  ¿Cuál de las siguientes opciones representa una ventaja directa del enfoque MLOps en la operación de modelos en producción?
+    Permite entrenar modelos más complejos.
+    Reduce el tamaño del modelo.
+    Asegura trazabilidad en el ciclo de vida del modelo.
+    Mejora la precisión del algoritmo.
+
+  Etapas clave del pipeline MLOps
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  Un pipeline de MLOps bien diseñado organiza el ciclo de vida del modelo en etapas estructuradas y automatizadas, que permiten pasar de los datos a la operación continua de manera controlada.
+Cada etapa tiene un propósito específico y aporta trazabilidad, estabilidad y capacidad de mejora al sistema. ¡Vamos a conocerlas!
+
+  La primera etapa es data, donde se recopilan, validan y versionan los datos que alimentarán el entrenamiento.
+Esta fase es crítica para asegurar la calidad de entrada del modelo y evitar que errores o inconsistencias afecten el resultado. Versionar los datasets permite reproducir experimentos, detectar cambios entre versiones y auditar decisiones tomadas a partir del modelo.
+  La segunda etapa es model, que abarca el entrenamiento, la evaluación y el registro del modelo. Aquí se definen los parámetros de entrenamiento, se ejecutan múltiples experimentos y se selecciona la mejor versión en función de métricas cuantitativas.
+Esta etapa incluye la validación cruzada, el análisis de resultados y la documentación de las condiciones bajo las cuales el modelo fue generado. La gestión de modelos incluye tanto el archivo entrenado como los metadatos que lo describen.
+  La tercera etapa es deploy, donde el modelo seleccionado se empaqueta y se publica en un entorno de producción. Este proceso puede involucrar la creación de contenedores, la definición de endpoints de inferencia y la integración con sistemas existentes. La automatización del despliegue permite liberar nuevas versiones sin intervención manual, con rollback en caso de errores y validación automatizada post-deployment.
+Esta etapa convierte al modelo en un servicio accesible y controlado.
+  En esta etapa se registran las predicciones realizadas por el modelo, se evalúa su rendimiento en producción y se detectan posibles desviaciones. Esta observabilidad permite reaccionar ante la deriva de datos o cambios de comportamiento en el sistema.
+  En esta última etapa, el modelo se actualiza utilizando nuevos datos y se reinicia el ciclo de validación, empaquetado y despliegue. Este lazo de retroalimentación es lo que permite que el modelo se mantenga útil y vigente en el tiempo.
+
+  🧠⚙️ FitPredict estructuró su proceso de producción siguiendo exactamente estas etapas: partieron de un dataset versionado, entrenaron su modelo con control de parámetros, lo desplegaron como un contenedor en AWS, monitorearon su funcionamiento a través de logs y métricas de inferencia, y planificaron un mecanismo de retraining periódico a partir de nuevos datos de usuarios activos.
+
+  💻 Caja de herramientas y entornos MLOps modernos
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  La implementación efectiva de MLOps requiere herramientas que acompañen cada una de las etapas del pipeline.
+Veamos algunas.
+
+  En la etapa de datos, herramientas como
+DVC
+permiten versionar datasets junto con el código, asegurando coherencia y reproducibilidad. DVC facilita también la comparación entre versiones y la gestión de grandes volúmenes de datos mediante almacenamiento remoto. Para el seguimiento de experimentos, MLflow permite registrar métricas, parámetros, artefactos y modelos, integrando la trazabilidad dentro del flujo de trabajo técnico.
+Durante el entrenamiento y orquestación de procesos, plataformas como
+Kubeflow y Metaflow
+permiten construir y ejecutar pipelines complejos, con integración a entornos de nube y escalabilidad nativa. Estas herramientas permiten representar gráficamente los pasos del flujo de entrenamiento, manejar dependencias, y reutilizar componentes en múltiples proyectos. Además, facilitan la automatización y el reentrenamiento programado con control de versiones incluido.
+Para el despliegue, existen soluciones como
+Seldon
+o el uso de contenedores
+Docker
+en combinación con Kubernetes o AWS ECS. Estas opciones permiten encapsular el modelo junto con su entorno de ejecución, asegurando consistencia entre pruebas y producción. También posibilitan escalar horizontalmente según demanda y configurar reglas de disponibilidad, tiempos de respuesta y tolerancia a fallos. Estas prácticas alinean los modelos con estándares de ingeniería de software modernos.
+La etapa de monitoreo se puede integrar con herramientas como
+Prometheus
+,
+Grafana
+o servicios de nube que permiten registrar métricas, errores y logs. El objetivo es medir el rendimiento del modelo en condiciones reales, identificar desviaciones y activar procesos de actualización cuando sea necesario. La integración de alertas, dashboards y reportes automáticos cierra el ciclo MLOps con visibilidad operativa.
+🧠⚙️
+FitPredict
+eligió combinar MLflow para experimentación, Docker y AWS para despliegue, y planifica integrar Airflow como orquestador de retraining. Esta caja de herramientas les permite construir un flujo completo, automatizado y auditable que acompaña al modelo desde su entrenamiento hasta su operación continua, integrándose a los sistemas ya existentes sin fricciones.
+
+  SIGUIENTE
+
+================================================================================
+Diseño de la arquitectura de una solución de ML [blocks]
+================================================================================
+  Cómo diseñar el diagrama de arquitectura de una solución de ML
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  🤖
+COmpletar desde aca!
+  Diseñar la arquitectura de una solución de machine learning implica representar los componentes técnicos y flujos de datos necesarios para llevar un modelo desde su desarrollo hasta su operación en producción. Un
+diagrama de arquitectura
+no es simplemente un mapa visual, sino una herramienta que permite comunicar las decisiones técnicas del sistema, anticipar cuellos de botella, y garantizar que cada parte del pipeline esté alineada con los objetivos del negocio.
+En el contexto de MLOps, este diseño debe contemplar tanto el ciclo de vida del modelo como los mecanismos de integración con los sistemas existentes.
+El primer paso para construir este diagrama es
+identificar los bloques funcionales mínimos
+: adquisición y validación de datos, entrenamiento y validación de modelos, empaquetado y despliegue, y monitoreo en producción. Cada uno de estos bloques debe estar asociado a servicios, tecnologías o recursos concretos. A su vez, es necesario definir cómo se comunican entre sí, qué tipo de artefactos se transfieren y en qué formato. Esta claridad permite no solo representar el flujo de trabajo, sino también establecer puntos de control, automatización y escalabilidad.
+La arquitectura debe también
+reflejar los entornos donde cada componente se ejecuta
+. Es habitual que existan entornos separados para desarrollo, validación y producción, cada uno con configuraciones y políticas de acceso diferentes. Además, debe contemplarse la forma en que los artefactos se versionan, almacenan y despliegan en cada entorno. La trazabilidad entre fases es un requisito central en soluciones de machine learning con foco en mantenimiento a largo plazo.
+Un buen diagrama no solo ilustra la solución actual, sino que permite pensar en su evolución. Una arquitectura bien diseñada contempla la posibilidad de incorporar nuevos modelos, reentrenar en paralelo, escalar horizontalmente y añadir nuevos puntos de monitoreo. Por eso, el diseño debe ser modular, con componentes desacoplados y bien definidos. Esta estrategia no solo facilita el mantenimiento, sino que reduce el riesgo de fallos sistémicos ante cambios puntuales.
+🧠⚙️
+Para
+FitPredict
+, el diseño de arquitectura permitió mapear claramente cómo se movería el modelo desde su etapa offline hasta el entorno productivo: desde los datos en bruto hasta la API final, cada componente fue definido en función de su rol técnico y su vínculo con el resto del sistema. Esto permitió no solo ordenar el flujo de trabajo, sino anticipar qué servicios de AWS utilizar, cómo vincularlos, y cómo escalar la solución una vez en producción.
+
+  Elección de componentes
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  🤔 Por qué el preprocesamiento es crítico
+  El diseño de una arquitectura robusta requiere seleccionar con claridad los componentes que intervendrán en cada etapa del flujo de machine learning. Estos componentes se agrupan generalmente en
+cuatro categorías técnicas: almacenamiento, procesamiento, entrenamiento y despliegue
+. Cada una cumple una función específica en el ciclo de vida del modelo y debe ser seleccionada en función de sus capacidades técnicas y su integración con el resto del sistema.
+
+  Almacenamiento
+  En el bloque de almacenamiento, es necesario disponer de una solución que permita guardar datasets, artefactos de entrenamiento y modelos serializados. Este almacenamiento debe ser accesible desde distintos entornos, tener capacidad de escalabilidad y permitir control de versiones. Servicios como Amazon S3 cumplen este rol, permitiendo alojar tanto archivos grandes como modelos .pkl, y configurarse con políticas de acceso seguras y auditables.
+  Procesamiento
+  En el área de procesamiento, se requiere una plataforma capaz de ejecutar transformaciones sobre los datos, predecir resultados a partir del modelo y responder a eventos externos. Este procesamiento puede ocurrir en tiempo real o por lotes, según el caso de uso. Frameworks como FastAPI, ejecutados dentro de contenedores Docker, permiten encapsular lógica de inferencia en servicios ligeros, escalables y reproducibles, compatibles con arquitecturas basadas en microservicios.
+  Entrenamiento
+  El componente de entrenamiento debe permitir ejecutar procesos iterativos, con posibilidad de registrar métricas, validar resultados y versionar modelos generados. En entornos productivos, el entrenamiento puede realizarse en máquinas locales, servicios de cómputo en la nube o entornos orquestados como SageMaker o Vertex AI. Lo fundamental es que el resultado del entrenamiento sea trazable y empacable para su posterior despliegue.
+  Despliegue
+  Por último, el componente de despliegue convierte el modelo entrenado en un servicio accesible. Este servicio puede estar expuesto mediante una API REST, ejecutarse dentro de una función Lambda o integrarse como microservicio en una infraestructura existente. El despliegue debe considerar latencia, escalabilidad, seguridad y observabilidad, de modo que el modelo se comporte como un componente más dentro del ecosistema de software.
+
+  🤔 Por qué el preprocesamiento es crítico
+  🧠⚙️ En el caso de FitPredict, se definieron claramente los componentes de cada etapa: los datos y modelos fueron almacenados en S3, el procesamiento de inferencia se encapsuló en un contenedor con FastAPI, el entrenamiento se realizó localmente con scikit-learn, y el despliegue se ejecutó en Lambda a través de una imagen alojada en ECR. Esta división permitió mantener un control claro de responsabilidades técnicas y reducir acoplamientos innecesarios entre capas del sistema.
+
+  Criterios para seleccionar herramientas
+  La selección de herramientas en una arquitectura de machine learning debe guiarse por criterios técnicos alineados con los objetivos operativos del proyecto.
+Entre los más relevantes se encuentran escalabilidad, costo y mantenimiento.
+Estos factores no solo influyen en el rendimiento y la disponibilidad de la solución, sino también en su capacidad de evolucionar, integrarse y sostenerse a lo largo del tiempo.
+
+  🟡 Escalabilidad
+  La escalabilidad es esencial cuando se espera que la solución de ML responda a un número creciente de usuarios, peticiones o datos. Herramientas que permiten escalar horizontalmente, como servicios serverless o contenedores en clústeres, permiten adaptar la infraestructura a la demanda sin rediseñar la arquitectura. Escoger tecnologías que soporten escalado automático reduce la necesidad de intervención manual y mejora la disponibilidad del modelo en producción.
+  🟡 Costo
+  El costo es otro criterio clave, especialmente en entornos de startups o proyectos con presupuestos ajustados. Algunas soluciones permiten comenzar con un plan gratuito o bajo demanda y escalar según el uso, como AWS Lambda o S3. La selección debe balancear funcionalidad con eficiencia económica, priorizando herramientas que permitan pagar solo por lo que se usa y evitar costos fijos en fases tempranas del producto.
+  🟡 Mantenibilidad
+  La mantenibilidad hace referencia a la facilidad con la que un sistema puede ser actualizado, monitoreado y corregido. Herramientas bien documentadas, con comunidad activa, integración con sistemas de CI/CD y soporte a largo plazo son preferibles frente a soluciones propietarias opacas o con alta complejidad operativa. La mantenibilidad también se refiere a la claridad en la configuración y a la capacidad de automatizar procesos rutinarios como el redeployment o la rotación de versiones.
+
+  Estos tres criterios —escalabilidad, costo y mantenimiento— deben evaluarse en conjunto para cada componente del sistema.
+No se trata solo de elegir la mejor herramienta técnica, sino la que mejor se adapta al contexto del proyecto, a la experiencia del equipo y a las restricciones operativas existentes. La alineación entre decisiones técnicas y objetivos del negocio es lo que garantiza la sostenibilidad del sistema.
+
+  🧠⚙️
+FitPredict
+eligió servicios que cumplen estos tres criterios: utilizó AWS Lambda por su capacidad de escalar sin servidores, almacenó modelos en S3 por su bajo costo y configuró sus componentes con Docker para asegurar mantenibilidad y portabilidad. Esta selección consciente les permitió construir una arquitectura funcional sin sobrecarga técnica ni presupuestaria, y con margen de crecimiento hacia nuevas funcionalidades futuras.
+
+  SIGUIENTE
+
+================================================================================
+Estrategias de despliegue en AWS [blocks]
+================================================================================
+  Publicación de modelos entrenados en S3
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  El primer paso para poner en producción un modelo de machine learning en AWS es su publicación como archivo disponible dentro del ecosistema de servicios en la nube. En este sentido, Amazon S3 funciona como sistema de almacenamiento central para alojar el modelo entrenado en su formato serializado, generalmente .pkl o .joblib. Esta publicación no es meramente un paso logístico: permite desacoplar el modelo del entorno de inferencia, facilitando la reutilización del archivo desde diferentes servicios como Lambda, EC2 o contenedores en ECS.
+
+  🤖
+COmpletar desde aca!
+  Para realizar esta publicación, es necesario contar con un bucket previamente creado y configurado con las políticas de acceso adecuadas. Una vez creado el bucket, el archivo del modelo se carga utilizando la consola de AWS o herramientas de línea de comandos como
+aws s3 cp
+. Es recomendable mantener una estructura clara de carpetas y versiones dentro del bucket para facilitar la trazabilidad. Además, es posible configurar S3 para aplicar reglas de versionado automático o políticas de ciclo de vida sobre los archivos alojados.
+El acceso al modelo desde otros servicios AWS puede realizarse a través de la URL del objeto en S3, siempre que se configure adecuadamente el rol o las credenciales asociadas. Esta disponibilidad remota del modelo permite que un servicio de inferencia cargue el archivo desde S3 en tiempo de ejecución, lo que agrega flexibilidad al proceso de despliegue. Sin embargo, en escenarios de inferencia intensiva, puede ser preferible empaquetar el modelo dentro del contenedor para evitar latencias asociadas a la carga.
+Publicar el modelo en S3 también habilita su gestión centralizada dentro del ciclo de vida del proyecto. Se pueden registrar las fechas de subida, los cambios entre versiones, y las integraciones con procesos automáticos de redeployment o monitoreo. Esta centralización simplifica la administración operativa del sistema y contribuye a mantener una arquitectura modular.
+🧠⚙️
+FitPredict
+optó por publicar su modelo de predicción de churn como un archivo
+.pkl
+en un bucket de S3 dedicado. Esta decisión les permitió desacoplar la lógica de inferencia del archivo del modelo, facilitando pruebas en distintos entornos y asegurando disponibilidad para futuras instancias de redeployment o monitoreo.
+
+  Contenerización usando ECR y ECS
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  🤔 Por qué el preprocesamiento es crítico
+  La
+contenerización del modelo
+es un paso esencial para encapsular su lógica de inferencia junto con sus dependencias en un entorno portable, reproducible y listo para ejecución.
+En AWS, esta práctica se integra con servicios como Amazon ECR (Elastic Container Registry) y Amazon ECS (Elastic Container Service). ECR actúa como repositorio donde se almacenan imágenes Docker, mientras que ECS es el servicio que orquesta la ejecución de esas imágenes como contenedores desplegados.
+Para contenerizar un modelo, primero se construye una imagen Docker que incluya el archivo del modelo, la lógica de inferencia (por ejemplo, una API en FastAPI) y un archivo
+requirements.txt
+con las dependencias necesarias. Esta imagen debe tener un
+Dockerfile
+bien definido, que instale las bibliotecas requeridas, copie los archivos necesarios al entorno y exponga el puerto correspondiente para el servicio.
+Una vez construida la imagen localmente, se etiqueta con la URL del repositorio en ECR y se sube utilizando comandos de Docker y AWS CLI. Es importante configurar correctamente los permisos para autenticarse en ECR y habilitar la escritura en el repositorio. La imagen quedará disponible para ser utilizada en cualquier instancia de ejecución compatible dentro del entorno AWS.
+ECS permite desplegar esta imagen como un contenedor que puede ejecutarse en un clúster Fargate o EC2, según las necesidades del proyecto. Este despliegue permite mantener la lógica del modelo aislada, escalable y orquestable. ECS facilita la gestión de versiones, el monitoreo de uso y la integración con balanceadores de carga, entre otros beneficios operativos.
+🧠⚙️
+En
+FitPredict
+, se optó por construir una imagen Docker que incluye el modelo y la API de inferencia, subirla a ECR y dejar disponible su ejecución desde servicios como Lambda o ECS. Esta decisión técnica les permitió desacoplar la ejecución del modelo de cualquier entorno físico y establecer un flujo de actualización continuo mediante el reemplazo controlado de imágenes.
+
+  Despliegue de una API de inferencia con AWS Lambda
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  AWS Lambda permite ejecutar funciones en la nube sin necesidad de gestionar servidores, convirtiéndose en una solución ideal para desplegar modelos ligeros como servicios de inferencia. En el contexto de MLOps, Lambda puede utilizarse para exponer un modelo como API REST, integrándose con API Gateway para recibir solicitudes HTTP. La configuración adecuada de este servicio permite responder a peticiones entrantes con baja latencia, escalabilidad automática y bajo costo operativo.
+
+  Predicción online y batch
+  La API debe ser creada con FastAPI, un framework liviano y moderno para construir servicios web. Esta API debe incluir un endpoint
+/prediccion
+que reciba los datos del usuario y ejecute una predicción utilizando el modelo previamente entrenado. El modelo puede estar incluido dentro del contenedor o cargarse desde S3 en el momento de ejecución. Para garantizar compatibilidad con Lambda, se debe definir un handler específico y usar
+uvicorn
+como servidor.
+El primer paso técnico es definir el
+Dockerfile
+que empaquete el código y el modelo. Luego, se crea la imagen, se sube a ECR, y desde allí se configura la función Lambda para que utilice esa imagen como entorno de ejecución. API Gateway debe conectarse con la función para recibir solicitudes POST y retornar respuestas en formato JSON. Esta arquitectura permite separar la lógica de negocio de la infraestructura y facilita el versionado y monitoreo.
+Esta estrategia es particularmente útil cuando se quiere ofrecer inferencias esporádicas o cuando el modelo tiene un tamaño reducido. Lambda ejecuta la función solo cuando hay peticiones activas, lo que permite reducir costos significativamente en comparación con instancias siempre activas. Además, la función puede integrarse fácilmente con otros servicios de AWS como CloudWatch, S3 o DynamoDB.
+🧠⚙️
+En el caso de
+FitPredict
+, se desarrolló una API en FastAPI con un endpoint
+/prediccion
+, que carga el modelo desde S3 y responde con una predicción binaria de churn. La imagen fue subida a ECR y ejecutada desde Lambda, conectada con API Gateway. Esta implementación les permitió exponer el modelo como un servicio web sin necesidad de mantener servidores activos, con escalabilidad automática y bajo costo.
+
+  ✅ Teniendo en cuenta lo aprendido, selecciona la respuesta correcta:
+
+  El servicio AWS Lambda permite desplegar un modelo de machine learning empaquetado en un contenedor Docker, siempre que se utilice junto con Amazon ECR.
+    Verdadero
+    Falso
+
+  Cómo liberar lo que hicimos en AWS
+
+  Una vez finalizado el proceso de despliegue y prueba del modelo, es fundamental liberar los recursos utilizados para evitar cargos innecesarios, especialmente si se está trabajando bajo el plan gratuito de AWS. Esta limpieza debe realizarse de forma consciente y ordenada, asegurando que no queden servicios activos que generen facturación por almacenamiento, ejecución o tráfico.
+El primer paso es eliminar el archivo del modelo desde el bucket de S3. Esto puede hacerse desde la consola de AWS o mediante el comando aws s3 rm. Luego, es necesario eliminar la imagen del repositorio de ECR, lo cual requiere forzar la eliminación si hay imágenes todavía vinculadas. Posteriormente, se debe borrar la función Lambda creada, así como el endpoint de API Gateway asociado.
+
+  ⚠️ Es recomendable verificar también que no hayan quedado clústeres o tareas activas en ECS, en caso de que se haya utilizado esta vía de despliegue. Asimismo, se deben revisar logs y métricas en CloudWatch, ya que su almacenamiento también puede generar costos adicionales. AWS permite automatizar algunas de estas tareas mediante scripts o plantillas de infraestructura como código.
+La limpieza no solo es una práctica responsable desde el punto de vista financiero, sino también técnico.
+Eliminar recursos no utilizados reduce la superficie de ataque, libera nombres de recursos para futuros proyectos y mantiene el entorno de trabajo organizado. Documentar esta rutina y compartirla entre equipos técnicos es una buena práctica dentro del enfoque MLOps.
+🧠⚙️
+FitPredict
+estableció una política interna para eliminar todos los recursos al finalizar las pruebas de despliegue. Este procedimiento incluyó el borrado del modelo en S3, la eliminación de la imagen en ECR, la función Lambda y su integración con API Gateway. Esta acción preventiva les permitió evitar cargos posteriores, optimizar el uso del plan gratuito de AWS y mantener su entorno de pruebas limpio y controlado.
+
+  Veamos el ejemplo
+
+  [recurso] DS_M5L6-V4
+  https://vimeo.com/1170086355/c4ec4e8f51?share=copy&fl=sv&fe=ci
+
+  SIGUIENTE
+
+================================================================================
+Cierre [section]
+================================================================================
+Cierre [blocks]
+================================================================================
+  ¡Vamos a recapitular lo aprendido!
+  ¡Vamos a recapitular todo lo que hemos aprendido!
+
+  En esta clase se abordaron los fundamentos operativos del machine learning aplicados a entornos reales de producción mediante un enfoque MLOps
+. A lo largo del recorrido se construyó una visión técnica y aplicada de los distintos componentes que intervienen en la transición desde la experimentación hasta el despliegue efectivo de un modelo en la nube. Todo el contenido se trabajó de forma progresiva y contextualizada, con el caso transversal de FitPredict como hilo conductor, permitiendo anclar cada concepto a una necesidad práctica concreta.
+
+  MLOps permite estructurar el ciclo de vida completo de un modelo de machine learning, resolviendo problemas de reproducibilidad, escalabilidad y automatización, mediante la colaboración entre Data Scientists, ML Engineers y DevOps.
+  A través de las diferencias con DevOps, se comprendió la lógica específica del pipeline MLOps, que incorpora etapas clave como data, model, deploy, monitor y retrain, junto con herramientas modernas como DVC, MLflow y Airflow.
+  Diseñar una arquitectura de ML requiere seleccionar componentes alineados con criterios técnicos como escalabilidad, costo y mantenimiento, contemplando almacenamiento, procesamiento, entrenamiento y despliegue como ejes centrales.
+  El despliegue en AWS se implementó paso a paso mediante la publicación del modelo en S3, su contenerización con Docker, la gestión de imágenes en ECR y la exposición de la API de inferencia en AWS Lambda, asegurando también su limpieza posterior.
+
+  La integración de estos conocimientos permitió construir una solución operativa, realista y sostenible para la empresa ficticia FitPredict. Esta experiencia concreta no solo consolidó los fundamentos de MLOps, sino que sentó las bases para aplicar estos principios en cualquier proyecto de machine learning que requiera escalar sus modelos hacia entornos productivos con calidad técnica y visión a largo plazo.
+
+  SIGUIENTE
+
+================================================================================
+Homework [blocks]
+================================================================================
+  ✏️ Consigna
+
+  Una compañía de seguros, FitInsurance, está desarrollando una solución para predecir el riesgo de accidentes en nuevos clientes en función de su edad, tipo de vehículo y experiencia al volante. El equipo de ciencia de datos ya entrenó un modelo de clasificación binaria y ahora necesita desplegarlo como una API REST en AWS.
+Tu tarea es
+contenerizar el modelo, subir la imagen a Amazon ECR y desplegarla como una función AWS Lambda que permita recibir solicitudes POST en un endpoint /riesgo.
+El modelo debe realizar una inferencia y responder si el cliente presenta riesgo (true) o no (false). Una vez finalizado el proceso, deberás eliminar todos los recursos en AWS para evitar cargos innecesarios.
+
+  ARCHIVOS DE TRABAJO
+  AQUÍ
+  [enlace] https://drive.google.com/drive/folders/1pJU01Oghp1r2UlqDrwP_ijDDHcEZ16HV?usp=drive_link
+
+  🟡 Requerimientos mínimos
+  Subir el archivo accident_risk_model.pkl a un bucket S3.
+Construir una imagen Docker que contenga el modelo y la API con FastAPI.
+Subir la imagen a un repositorio privado en Amazon ECR.
+Crear una función Lambda basada en la imagen subida.
+Configurar API Gateway para exponer el endpoint /riesgo.
+Probar la inferencia con el archivo test_insurance.json.
+Eliminar todos los recursos creados en AWS (S3, Lambda, ECR, API Gateway).
+
+  🚀 Extra credits (optativo)
+
+  Implementar logging de cada inferencia en CloudWatch.
+  Adaptar el código para que el modelo se cargue directamente desde S3 en tiempo de ejecución.
+  Añadir validación personalizada en el esquema de entrada de FastAPI.
+  Documentar la API con Swagger usando las capacidades nativas de FastAPI.
+
+  SIGUIENTE
+
+================================================================================
+Feedback [blocks]
+================================================================================
+  [recurso]
+  <iframe src="https://airtable.com/embed/appqMsKXhahDwA7lL/pagUns5rEbJFXjbt8/form" frameborder="0" width="100%" height="533"></iframe>
+
+  FIN DE LA LECCIÓN

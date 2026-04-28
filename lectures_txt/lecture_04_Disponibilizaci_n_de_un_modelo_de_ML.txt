@@ -1,0 +1,650 @@
+Lecture 4: V2DSM5L4 | Disponibilización de un modelo de ML
+Modulo: Fundamentos de nube y ciencia de datos de producción
+SCORM: https://capsulasv2.soyhenry.com/scorm/f55ed465-73a6-4239-b6c8-26d02a87b057/scormcontent/index.html
+
+================================================================================
+Inicio [section]
+================================================================================
+Introducción [blocks]
+================================================================================
+  ¡Bienvenidos!
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  Bienvenidos/as a la lecture: Disponibilización de un modelo de ML 😎
+Tener un modelo entrenado y validado no marca el final del trabajo, sino el inicio de una etapa crítica: su disponibilización. Llevar un modelo a producción significa convertirlo en una herramienta que otros sistemas, usuarios o aplicaciones puedan utilizar de forma segura, eficiente y escalable. Esta clase aborda esa transición, explorando
+cómo exponer modelos de machine learning a través de interfaces accesibles y funcionales
+, ya sea mediante APIs o aplicaciones web interactivas.
+En los entornos actuales,
+los modelos no existen en aislamiento
+. Forman parte de flujos de negocio que exigen comunicación con otras piezas del sistema: bases de datos, formularios de entrada, servicios de decisión o visualización. Por eso, esta clase pone el foco en tres herramientas clave del stack Python que permiten dar vida a un modelo en escenarios reales: FastAPI para crear servicios web ligeros y rápidos; PyCaret como alternativa automatizada para disponibilización inmediata; y Streamlit como solución para prototipos interactivos con visualización integrada.
+El valor de estas herramientas no reside solo en su facilidad de uso, sino en la capacidad de integrarse con procesos existentes, adaptarse a distintos casos de uso (predicción online o batch), y facilitar el monitoreo continuo del modelo en producción. Comprender sus diferencias, complementariedades y mejores prácticas es esencial para diseñar soluciones técnicas que puedan mantenerse en el tiempo y escalar según las necesidades del negocio.
+A lo largo de esta clase, se explorarán distintas formas de poner un modelo en funcionamiento, exponiéndolo a través de rutas bien definidas, asegurando la validación de entradas, manejando errores de forma robusta y permitiendo tanto el uso programático como la interacción visual. Se trata de ir un paso más allá del modelado y comenzar a pensar en productos de machine learning que estén preparados para el mundo real.
+¡Éxitos! 🚀
+
+  Objetivos de la lección
+💥
+
+  Comprender los fundamentos de las APIs y FastAPI, analizando sus funciones básicas, métodos y parámetros para la construcción de servicios eficientes.
+  Implementar una API para un modelo de machine learning con FastAPI, explorando la creación manual y automática con PyCaret para optimizar su disponibilidad.
+  Explorar Streamlit para la visualización y predicción de modelos de ML, evaluando su funcionalidad en entornos online y batch.
+
+  Caso integrador
+
+  Caso transversal – CrediPulse: activando el scoring en producción
+
+  CrediPulse
+es una fintech que ha logrado desarrollar un modelo predictivo robusto para evaluar la probabilidad de default en solicitudes de crédito. El modelo fue entrenado con datos históricos validados y muestra buen desempeño en pruebas de validación. Sin embargo, aún no está operativo: vive como un archivo serializado que solo puede ejecutarse manualmente desde notebooks técnicos.
+La empresa busca ahora disponibilizar ese modelo para que pueda ser utilizado de forma automática por distintos usuarios y servicios. Por un lado, el equipo de backoffice necesita integrarlo con los formularios digitales para obtener una predicción instantánea cada vez que ingresa una nueva solicitud. Por otro, el área de análisis desea contar con una herramienta visual que permita explorar las predicciones, interpretar resultados y monitorear el comportamiento del modelo a lo largo del tiempo.
+La solución debe considerar múltiples formas de interacción
+: consumo programático vía API, interfaz para cargas batch y visualización en tiempo real. Además, debe incluir validaciones de datos, respuesta a errores comunes y métricas visuales que permitan detectar posibles desviaciones futuras. La implementación debe apoyarse en herramientas modernas del ecosistema Python que permitan escalar y mantener el sistema en producción.
+A lo largo de esta clase, se trabajará con un conjunto simulado de solicitudes de crédito.
+El objetivo será construir distintos mecanismos de disponibilización sobre este modelo
+: desde una API construida con FastAPI, hasta una aplicación visual interactiva con Streamlit, explorando también las opciones automatizadas que ofrece PyCaret para exposición rápida. Cada herramienta se pondrá en práctica en función de sus ventajas, limitaciones y tipo de uso que se espera del sistema.
+
+  👩🏽‍💻Archivos necesarios
+
+  Dataset
+  AQUÍ
+  [enlace] https://drive.google.com/file/d/1jScG52pzGwhrM2XoukquDP9lGR9fE1rl/view?usp=drive_link
+
+  model.pkl
+  AQUÍ
+  [enlace] https://drive.google.com/file/d/1Xr-DRrPC_DWHdXLx9C5DuVA--kNjh51s/view?usp=drive_link
+
+  SIGUIENTE
+
+================================================================================
+Desarollo [section]
+================================================================================
+Diseño y gestión de APIs para la disponibilización de modelos [blocks]
+================================================================================
+  Fundamentos de APIs en Machine Learning
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  🤖
+COmpletar desde aca!
+  En entornos de machine learning productivo, los modelos no se ejecutan de forma aislada.
+Forman parte de sistemas más amplios que necesitan enviarles datos y recibir respuestas
+. Para facilitar esta comunicación entre distintas partes de una arquitectura —por ejemplo, entre una aplicación web y un modelo predictivo— se utiliza una interfaz común conocida como
+API, o Application Programming Interface
+. En términos simples,
+una API actúa como un puente entre sistemas
+: define las reglas y formatos con los cuales una parte puede hacer una solicitud y recibir una respuesta sin conocer los detalles internos de la otra.
+🧩 En el caso de
+CrediPulse
+, el modelo de scoring ya está entrenado y validado, pero todavía no existe una forma sencilla y robusta de acceder a él desde los canales digitales de la empresa. Cada vez que llega una nueva solicitud, el equipo de analistas debe ejecutar el modelo manualmente. Esto es insostenible a medida que la compañía escala. Lo que se necesita es una API que reciba una solicitud con datos del cliente, la procese, ejecute el modelo y devuelva una predicción. Este mecanismo debe funcionar de forma automática, segura y estandarizada, y es exactamente ahí donde las APIs toman protagonismo.
+Además de conectar servicios,
+las APIs permiten abstraer la lógica interna del modelo.
+Quien consume la API no necesita saber cómo está construido el pipeline, qué transformaciones se aplican o qué algoritmo se utiliza. Solo debe enviar los datos correctos en el formato indicado y esperar una respuesta. Esta separación entre lógica y acceso es clave para facilitar el mantenimiento, el versionado y la evolución del sistema sin afectar a los usuarios o integraciones.
+La incorporación de una API en CrediPulse no es solo un paso técnico, sino también una transformación organizacional. Permite que distintas áreas —producto, tecnología, riesgo— accedan a predicciones del modelo sin depender del equipo de datos. Habilita integraciones con otros sistemas como CRMs, herramientas de automatización de decisiones o formularios digitales. En definitiva, convierte al modelo en un servicio disponible, reutilizable y alineado con los procesos reales del negocio.
+
+  Introducción a FastAPI 📝
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  🤖
+COmpletar desde aca!
+  Para implementar esta API, se utiliza
+FastAPI
+, un framework moderno y eficiente que permite crear servicios web en Python de forma declarativa y rápida.
+Una aplicación básica de FastAPI se compone de un archivo
+.py
+donde se define una instancia de la aplicación, se crean las rutas o endpoints, y se asocian funciones a cada una de ellas. Estas funciones definen qué debe hacer el servidor cuando recibe una solicitud en una determinada ruta.
+La estructura mínima incluye una instancia de la app (
+app = FastAPI()
+), la definición de un endpoint con un decorador (
+@
+app.post
+("/predict")
+, por ejemplo) y la lógica que se ejecuta cuando ese endpoint es llamado. Cada endpoint puede recibir parámetros, ya sea como parte de la URL o como cuerpo de la solicitud. En nuestro caso, se define un objeto que contiene los datos de entrada —edad, ingresos, tipo de empleo, etc.— y se pasa a la función que se encarga de realizar la predicción con el modelo cargado.
+Esta estructura permite que la API sea clara, modular y fácil de mantener. Además, FastAPI genera automáticamente documentación interactiva accesible desde el navegador, lo que facilita enormemente la validación y prueba de los servicios. En entornos colaborativos como el de CrediPulse, esta funcionalidad es clave para que distintos perfiles puedan comprender cómo funciona la API y cómo integrarse a ella.
+
+  El ecosistema de FastAPI se complementa con dos herramientas esenciales. Uvicorn es el servidor ASGI que permite ejecutar la aplicación y dejarla disponible en un puerto específico para recibir conexiones. Suele usarse con el comando
+uvicorn main:app --reload
+, donde
+main
+es el nombre del archivo
+.py
+y
+app
+la instancia definida. Por otro lado, Pydantic es la biblioteca que permite definir la estructura de los datos de entrada, realizar validaciones automáticas y retornar errores claros si la entrada no cumple con el formato esperado. Estas herramientas hacen posible que la API de CrediPulse sea robusta, clara y preparada para escalar.
+
+  Creación de API para un modelo de ML con FastAPI
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  Con los fundamentos definidos y la estructura de FastAPI comprendida, el siguiente paso para el equipo de
+CrediPulse
+fue construir una API funcional que efectivamente sirviera el modelo de scoring. Este modelo, previamente entrenado y serializado, debía ser cargado automáticamente al iniciar la aplicación. La API tendría como función principal recibir una solicitud con los datos del cliente, procesarlos mediante el pipeline de preprocesamiento incluido en el modelo, y retornar una predicción sobre el riesgo de default.
+La ruta principal fue definida como
+/predict
+, y configurada para aceptar solicitudes HTTP tipo
+POST
+. Esto permite enviar un cuerpo de datos estructurados en formato JSON, que es luego transformado en un objeto Python usando Pydantic. FastAPI valida automáticamente que los campos estén presentes, tengan el tipo correcto, y cumplan con las condiciones mínimas requeridas. Si algo falla, la respuesta incluye detalles del error, lo que facilita la depuración y asegura integridad de entrada.
+Además de la lógica de predicción, el equipo incluyó prácticas fundamentales para robustecer el servicio. Entre ellas: manejo de excepciones personalizadas, logs con detalles de cada solicitud procesada, y respuestas estandarizadas para evitar ambigüedades. También se aprovechó el soporte nativo de Swagger UI de FastAPI, que genera una interfaz web desde la ruta
+/docs
+en la que se puede explorar, probar y documentar la API sin escribir una sola línea adicional.
+El uso de Uvicorn como servidor permitió levantar la aplicación de manera sencilla, localmente y luego en un entorno de staging. Con el comando
+uvicorn main:app --reload
+, la API quedó disponible para recibir solicitudes y retornar predicciones en tiempo real. Esta implementación no solo resolvió el problema técnico de integración del modelo, sino que habilitó una nueva capa de uso interno para CrediPulse, permitiendo automatizar decisiones y conectar sistemas sin intervención humana directa.
+Este proceso se resumen en el siguiente gráfico:
+
+  A continuación presentamos un ejemplo básico de implementación:
+
+  [codigo]
+  """
+  CrediPulse — API de scoring con FastAPI
+  ---------------------------------------
+  Requisitos:
+      pip install fastapi uvicorn[standard] scikit-learn joblib pandas pydantic
+  
+  Arranque local:
+      uvicorn main:app --reload --port 8000
+  
+  Swagger UI:
+      http://127.0.0.1:8000/docs
+  """
+  import os, logging
+  from typing import Optional, Literal
+  import joblib, numpy as np, pandas as pd
+  from fastapi import FastAPI, HTTPException
+  from pydantic import BaseModel, Field, validator
+  from datetime import datetime
+  from uuid import uuid4
+  
+  logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(name)s | %(message)s")
+  logger = logging.getLogger("credipulse-api")
+  
+  app = FastAPI(title="CrediPulse Scoring API", version="1.0.0")
+  
+  EmploymentType = Literal["formal", "informal", "self_employed", "unemployed"]
+  
+  class CreditRequest(BaseModel):
+      age: int = Field(..., ge=18, le=100)
+      monthly_income: float = Field(..., ge=0)
+      employment_type: EmploymentType
+      tenure_months: int = Field(..., ge=0, le=600)
+      region: str = Field(..., min_length=2, max_length=40)
+      has_credit_card: bool
+      debt_to_income: float = Field(..., ge=0, le=5.0)
+      prev_defaults: Optional[int] = Field(0, ge=0, le=20)
+      open_loans: Optional[int] = Field(0, ge=0, le=50)
+      @validator("region")
+      def normalize_region(cls, v: str) -> str:
+          return v.strip().lower()
+  
+  class PredictionResponse(BaseModel):
+      request_id: str
+      model_version: str
+      threshold: float
+      default_probability: float
+      approved: bool
+      timestamp: str
+  
+  _MODEL = None
+  _MODEL_VERSION = "unknown"
+  
+  def load_model_if_needed() -> None:
+      global _MODEL, _MODEL_VERSION
+      if _MODEL is not None:
+          return
+      model_path = os.getenv("MODEL_PATH", "creditpulse_model.joblib")
+      if not os.path.exists(model_path):
+          logger.warning("Modelo no encontrado en %s, cargando placeholder.", model_path)
+          from sklearn.linear_model import LogisticRegression
+          from sklearn.preprocessing import OneHotEncoder, StandardScaler
+          from sklearn.compose import ColumnTransformer
+          from sklearn.pipeline import Pipeline
+          num = ["age","monthly_income","tenure_months","debt_to_income","prev_defaults","open_loans"]
+          cat = ["employment_type","region","has_credit_card"]
+          pre = ColumnTransformer([("num", StandardScaler(), num),("cat", OneHotEncoder(handle_unknown="ignore"), cat)])
+          _MODEL = Pipeline([("pre", pre), ("clf", LogisticRegression())])
+          _MODEL_VERSION = "placeholder-0.1.0"
+          return
+      _MODEL = joblib.load(model_path)
+      _MODEL_VERSION = os.path.basename(model_path)
+  
+  def df_from_request(req: CreditRequest) -> pd.DataFrame:
+      return pd.DataFrame([{
+          "age": req.age,
+          "monthly_income": req.monthly_income,
+          "employment_type": req.employment_type,
+          "tenure_months": req.tenure_months,
+          "region": req.region,
+          "has_credit_card": req.has_credit_card,
+          "debt_to_income": req.debt_to_income,
+          "prev_defaults": req.prev_defaults or 0,
+          "open_loans": req.open_loans or 0,
+      }])
+  
+  def predict_default_proba(df: pd.DataFrame) -> float:
+      load_model_if_needed()
+      model = _MODEL
+      if hasattr(model, "predict_proba"):
+          return float(model.predict_proba(df)[:,1][0])
+      elif hasattr(model, "decision_function"):
+          from scipy.special import expit
+          return float(expit(model.decision_function(df))[0])
+      else:
+          p = float(model.predict(df)[0])
+          return max(0.0, min(1.0, p))
+  
+  @app.get("/health")
+  def health():
+      return {"status":"ok","model_loaded": _MODEL is not None,"model_version": _MODEL_VERSION}
+  
+  @app.post("/predict", response_model=PredictionResponse)
+  def predict(req: CreditRequest, threshold: float = 0.35):
+      rid = str(uuid4())
+      try:
+          df = df_from_request(req)
+          proba = predict_default_proba(df)
+          approved = proba < threshold
+          return {
+              "request_id": rid,
+              "model_version": _MODEL_VERSION,
+              "threshold": float(threshold),
+              "default_probability": round(proba,6),
+              "approved": bool(approved),
+              "timestamp": datetime.utcnow().isoformat() + "Z"
+          }
+      except Exception as e:
+          logger.exception("RID=%s | Error: %s", rid, e)
+          raise HTTPException(status_code=500, detail="Error interno")
+
+  Creación automática de API con PyCaret
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  Como alternativa al desarrollo manual, el equipo también exploró una opción más rápida: la
+creación automática de una API usando PyCaret
+. Esta biblioteca permite, luego de entrenar un modelo dentro de su entorno, exponerlo directamente como una API con apenas un par de líneas de código. La idea detrás de esta funcionalidad es facilitar el proceso de disponibilización para casos en los que la velocidad de despliegue es prioritaria, como pruebas internas, entornos de staging o prototipado.
+En el caso de CrediPulse, el equipo cargó el modelo en PyCaret, configuró las funciones necesarias y ejecutó el comando que expone el modelo como endpoint. En segundos, una API básica quedó disponible, con soporte para solicitudes POST, validaciones automáticas y documentación integrada. Esta versión era suficiente para mostrar el flujo general del modelo, compartirlo con otros equipos o integrarlo temporalmente a un frontend experimental.
+Sin embargo, también se identificaron
+limitaciones
+. La API generada automáticamente no ofrecía la misma capacidad de personalización en cuanto a manejo de errores, logs, transformación de respuestas o integración con sistemas adicionales. Tampoco era ideal para entornos productivos donde se requiere mayor control sobre cada etapa del flujo. Por esta razón, PyCaret se utilizó como herramienta complementaria, útil para acelerar pruebas, pero no como reemplazo definitivo de la API desarrollada con FastAPI.
+Esta comparación entre soluciones —una manual, más robusta y flexible; otra automática, más rápida pero limitada— permitió al equipo de CrediPulse comprender que la disponibilización de modelos no es una acción puntual, sino una
+decisión arquitectónica
+. Elegir cómo, con qué herramientas y bajo qué condiciones se expone un modelo es parte del trabajo profesional que convierte una predicción en una herramienta real de negocio.
+
+  ⚠️
+Antes de continuar...
+
+  ¿Cuál es el propósito principal de una API en el contexto de disponibilización de modelos de machine learning?
+    Mejorar la precisión del modelo mediante reentrenamiento automático.
+    Permitir que otros sistemas o usuarios interactúen con el modelo a través de solicitudes estandarizadas.
+    Aumentar la velocidad de entrenamiento del modelo.
+    Reducir el tamaño del archivo del modelo antes de guardarlo.
+
+  Veamos un video
+
+  En el siguiente video presentamos el caso de uso de la lecture y aplicaremos FastAPI
+
+  [recurso] DS_M5L4-V1
+  https://vimeo.com/1164808852/7d147c5d45
+
+  SIGUIENTE
+
+================================================================================
+Visualización de modelos con Streamlit [blocks]
+================================================================================
+  💻 Introducción a Streamlit y sus componentes básicos
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  🤖
+COmpletar desde aca!
+  Una vez que el modelo de CrediPulse estuvo disponible como API, surgió una nueva necesidad dentro del equipo de analistas: contar con una interfaz visual que permitiera explorar predicciones, validar entradas y monitorear el comportamiento del modelo sin tener que interactuar directamente con scripts o endpoints. El objetivo era crear una herramienta accesible, rápida de desarrollar y que facilitara tanto la exploración de datos como la interpretación de resultados. Para esto, se eligió
+Streamlit
+, un framework de desarrollo web orientado a aplicaciones de ciencia de datos.
+
+  Streamlit
+permite transformar un script de Python en una aplicación web interactiva con muy poco código adicional. Su enfoque es declarativo y reactivo: cada vez que el usuario modifica un input, toda la lógica del script se vuelve a ejecutar, actualizando las visualizaciones o resultados en tiempo real. Esta característica lo convierte en una excelente opción para prototipos, dashboards y herramientas internas que requieren agilidad, pero no necesariamente robustez a nivel de backend o escalabilidad a gran escala.
+
+  En términos de estructura, una app de Streamlit se organiza como un script plano (.py) en el que se definen secciones visuales con comandos simples como st.title(), st.selectbox(), st.write(), entre otros. No requiere conocimientos de HTML ni CSS, lo cual reduce la barrera de entrada. La ejecución se hace con el comando streamlit run
+archivo.py
+, y a partir de allí se lanza una aplicación en el navegador local. Este flujo resultó ideal para el equipo de CrediPulse, que necesitaba una solución rápida sin depender del equipo de desarrollo frontend.
+En comparación con las APIs tradicionales, Streamlit ofrece una experiencia más visual e inmediata. Mientras que la API sirve como backend para integraciones programáticas, la app de Streamlit cumple un rol distinto: habilita la interacción directa con el modelo por parte de perfiles no técnicos. En este sentido, ambas soluciones son complementarias. Para CrediPulse, esto significó poder exponer su modelo tanto a los sistemas automáticos como a los analistas humanos que requieren una interfaz más intuitiva.
+
+  Desarrollo de una aplicación web de Streamlit para ML
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  🤔 Por qué el preprocesamiento es crítico
+  El equipo de visualización de CrediPulse desarrolló una app que permite a los usuarios cargar datos, ejecutar predicciones y observar el comportamiento del modelo en tiempo real. Esta herramienta fue pensada como panel de control interno, con dos modos de uso:
+predicción online
+, para registrar un solo caso, y
+predicción batch
+, para procesar múltiples solicitudes desde un archivo CSV. En ambos casos, la aplicación carga el modelo entrenado, aplica el pipeline de transformación y devuelve los resultados junto con visualizaciones auxiliares.
+
+  Modo online
+  En el modo online, se diseñó un formulario que simula el ingreso de una nueva solicitud. Los campos —edad, ingreso mensual, nivel educativo, empleo, región, propósito del préstamo— se completan manualmente y luego se ejecuta el modelo al presionar el botón de predicción. El resultado aparece en pantalla, acompañado de una métrica visual (st.metric) que indica si hay riesgo o no. Esta interacción reproduce el flujo típico de un usuario real ingresando a una plataforma de créditos.
+  Modo Batch
+  En modo batch, se permite cargar un archivo .csv con múltiples registros, y el sistema procesa todos en bloque, devolviendo una tabla con las predicciones por fila. Esta tabla puede descargarse directamente desde la app para uso posterior. Esta funcionalidad resultó especialmente útil para el equipo de operaciones, que necesitaba evaluar listas completas de solicitudes offline antes de volcarlas al sistema.
+
+  Más allá de las predicciones, la app incluye una sección para la visualización de métricas, enfocada en el análisis de drift. A partir de los resultados obtenidos, se grafican comparaciones entre distribuciones históricas y actuales para detectar cambios en variables clave. Se utilizan gráficos de barras (
+st.bar
+_chart), comparativas por categorías, y semáforos visuales que alertan si alguna variable muestra señales de inestabilidad. Estos indicadores permiten anticipar problemas antes de que afecten la calidad de las predicciones.
+
+  Predicción online y batch
+  Uno de los objetivos centrales del equipo fue habilitar dos formas distintas de usar el modelo dentro de la aplicación: predicción online y batch. Cada una responde a un tipo de necesidad diferente dentro de la operación de CrediPulse, y por lo tanto debían convivir en la misma herramienta sin generar fricciones en la experiencia de uso.
+
+  Predicción online
+  La predicción online está pensada para escenarios uno a uno, en los que se quiere simular o validar un único caso. Por ejemplo, cuando un operador de riesgo quiere entender cómo se comportaría el modelo ante una solicitud hipotética. En este flujo, se muestran campos individuales que se completan con formularios, y el resultado aparece en pantalla en cuestión de segundos. Esta forma de uso es ideal para testing, demostraciones o análisis exploratorio.
+  Predicción batch
+  La predicción batch responde a situaciones más operativas, como la evaluación masiva de solicitudes provenientes de una campaña o cargadas desde una base externa. En este caso, el usuario selecciona un archivo CSV, la app lo procesa en segundo plano y devuelve una tabla enriquecida con las predicciones. El flujo contempla validaciones básicas del archivo, limpieza mínima, y la posibilidad de descargar los resultados como un nuevo CSV, listo para integrarse al proceso de análisis.
+
+  Ambas modalidades comparten el mismo modelo en backend y el mismo pipeline de transformación.
+Esto asegura consistencia en los resultados sin importar la forma de uso. Además, se incluye un pequeño panel de métricas que permite visualizar de forma agregada cuántos casos fueron predichos como riesgosos, cuántos como aprobados, y cómo se distribuyen estas categorías en función de algunas variables explicativas.
+La combinación de predicción online y batch, junto con las visualizaciones de drift, convierten a la app de Streamlit en una herramienta completa para la operación diaria. En vez de consultar al modelo desde la consola o depender de integraciones complejas, los analistas de CrediPulse ahora pueden interactuar directamente con el sistema en un entorno visual, claro y funcional, que refleja tanto la lógica técnica del modelo como los requerimientos reales del negocio.
+La visualización con Streamlit de las predicciones de un modelo de ML se puede resumir así:
+
+  Implementación con Scikit-Learn
+  Observa un
+ejemplo
+de implementación:
+
+  [codigo]
+  """
+  Visualización de modelos con Streamlit — CrediPulse
+  ===================================================
+  Esta app implementa:
+  1) Predicción **online** (formulario 1 a 1).
+  2) Predicción **batch** (CSV) con descarga de resultados.
+  3) **Monitoreo** básico de drift (distribuciones históricas vs actuales) y panel de métricas.
+  
+  Requisitos:
+      pip install streamlit scikit-learn pandas numpy joblib
+  
+  Ejecución:
+      streamlit run app.py
+  
+  Notas:
+  - Se espera un pipeline sklearn serializado (.joblib) en MODEL_PATH (o "creditpulse_model.joblib").
+  - El pipeline debe manejar preprocesamiento interno (num + cat) para que la app solo pase un DataFrame.
+  """
+  from __future__ import annotations
+  
+  import os
+  import io
+  import json
+  import time
+  import joblib
+  import numpy as np
+  import pandas as pd
+  import streamlit as st
+  from typing import Optional, Literal
+  
+  # --------------------------- Configuración de página ---------------------------
+  st.set_page_config(
+      page_title="CrediPulse — Visualización de modelos (Streamlit)",
+      page_icon="📈",
+      layout="wide",
+  )
+  
+  # --------------------------- Utilidades de caché ------------------------------
+  @st.cache_resource(show_spinner=False)
+  def load_model(path: str = "creditpulse_model.joblib"):
+      """
+      Carga un pipeline sklearn (con preprocesamiento) desde disco.
+      Usa cache para evitar recarga en cada interacción.
+      """
+      if not os.path.exists(path):
+          st.warning("Modelo no encontrado, se usará un placeholder (solo demostración).")
+          from sklearn.linear_model import LogisticRegression
+          from sklearn.preprocessing import OneHotEncoder, StandardScaler
+          from sklearn.compose import ColumnTransformer
+          from sklearn.pipeline import Pipeline
+  
+          num = ["age", "monthly_income", "tenure_months", "debt_to_income", "prev_defaults", "open_loans"]
+          cat = ["employment_type", "region", "has_credit_card"]
+  
+          pre = ColumnTransformer([
+              ("num", StandardScaler(), num),
+              ("cat", OneHotEncoder(handle_unknown="ignore"), cat),
+          ])
+          model = Pipeline([("pre", pre), ("clf", LogisticRegression())])
+          model.__version__ = "placeholder-0.1.0"
+          return model
+  
+      model = joblib.load(path)
+      # Intenta leer versión desde el nombre del archivo
+      model.__version__ = os.path.basename(path)
+      return model
+  
+  def predict_proba(model, df: pd.DataFrame) -> np.ndarray:
+      """Convierte predict_proba o decision_function a probabilidad de default."""
+      if hasattr(model, "predict_proba"):
+          return model.predict_proba(df)[:, 1]
+      elif hasattr(model, "decision_function"):
+          from scipy.special import expit
+          return expit(model.decision_function(df))
+      else:
+          p = model.predict(df).astype(float)
+          return np.clip(p, 0, 1)
+  
+  def format_number(x: float) -> str:
+      return f"{x:.3f}"
+  
+  # --------------------------- Sidebar -----------------------------------------
+  st.sidebar.header("⚙️ Configuración")
+  model_path = st.sidebar.text_input("Ruta del modelo (.joblib)", os.getenv("MODEL_PATH", "creditpulse_model.joblib"))
+  threshold = st.sidebar.slider("Umbral de aprobación (prob < threshold → aprobado)", 0.0, 1.0, 0.35, 0.01)
+  
+  with st.sidebar.expander("ℹ️ Ayuda"):
+      st.write("""
+  - **Modelo**: pipeline sklearn con preprocesamiento interno.
+  - **Umbral**: si la probabilidad de default es menor al umbral, se considera *aprobado*.
+  - **Tabs**:
+     - *Online*: formulario para 1 caso.
+     - *Batch*: subir CSV con múltiples filas.
+     - *Monitoreo*: comparar distribuciones históricas vs actuales y ver métricas agregadas.
+      """)
+  
+  # --------------------------- Cargar modelo -----------------------------------
+  with st.spinner("Cargando modelo..."):
+      model = load_model(model_path)
+  st.sidebar.success(f"Modelo cargado: {getattr(model, '__version__', 'desconocida')}")
+  
+  st.title("Visualización de modelos con Streamlit — CrediPulse")
+  st.caption("Predicción online, batch y monitoreo básico de drift y métricas.")
+  
+  # --------------------------- Tabs principales --------------------------------
+  tab_online, tab_batch, tab_monitor = st.tabs(["🧑‍💼 Online", "📦 Batch", "🧭 Monitoreo"])
+  
+  # --------------------------- 1) Predicción Online ----------------------------
+  with tab_online:
+      st.subheader("Predicción Online (formulario)")
+  
+      col1, col2, col3 = st.columns(3)
+  
+      with col1:
+          age = st.number_input("Edad", min_value=18, max_value=100, value=34, step=1)
+          monthly_income = st.number_input("Ingreso mensual", min_value=0.0, value=1200.0, step=50.0, format="%.2f")
+          tenure_months = st.number_input("Antigüedad laboral (meses)", min_value=0, max_value=600, value=24, step=1)
+  
+      with col2:
+          employment_type = st.selectbox("Tipo de empleo", ["formal", "informal", "self_employed", "unemployed"], index=0)
+          region = st.selectbox("Región", ["north", "south", "east", "west"], index=0)
+          has_credit_card = st.checkbox("¿Tiene tarjeta de crédito?", value=True)
+  
+      with col3:
+          debt_to_income = st.slider("DTI (deuda/ingreso)", 0.0, 5.0, 0.45, 0.01)
+          prev_defaults = st.number_input("Defaults previos", min_value=0, max_value=20, value=0, step=1)
+          open_loans = st.number_input("Préstamos abiertos", min_value=0, max_value=50, value=2, step=1)
+  
+      if st.button("Predecir", type="primary"):
+          df = pd.DataFrame([{
+              "age": age,
+              "monthly_income": monthly_income,
+              "employment_type": employment_type,
+              "tenure_months": tenure_months,
+              "region": region,
+              "has_credit_card": has_credit_card,
+              "debt_to_income": debt_to_income,
+              "prev_defaults": prev_defaults,
+              "open_loans": open_loans,
+          }])
+          proba = float(predict_proba(model, df)[0])
+          approved = proba < threshold
+  
+          colA, colB, colC = st.columns(3)
+          colA.metric("Prob. Default", format_number(proba))
+          colB.metric("Umbral", format_number(threshold))
+          colC.metric("Decisión", "Aprobado ✅" if approved else "Requiere revisión ❗")
+  
+          with st.expander("Ver datos enviados"):
+              st.json(df.to_dict(orient="records")[0])
+  
+  # --------------------------- 2) Predicción Batch -----------------------------
+  with tab_batch:
+      st.subheader("Predicción Batch (CSV)")
+      st.write("Formato esperado: columnas del pipeline (num + cat).")
+      file = st.file_uploader("Sube un archivo CSV", type=["csv"])
+  
+      if file is not None:
+          try:
+              df_batch = pd.read_csv(file)
+              st.write("Vista previa:")
+              st.dataframe(df_batch.head(20), use_container_width=True)
+  
+              if st.button("Procesar CSV"):
+                  with st.spinner("Calculando predicciones..."):
+                      probs = predict_proba(model, df_batch)
+                      df_out = df_batch.copy()
+                      df_out["default_proba"] = probs
+                      df_out["approved"] = (df_out["default_proba"] < threshold).astype(int)
+  
+                  # Panel de métricas agregadas
+                  risky = int((df_out["approved"] == 0).sum())
+                  approved_n = int((df_out["approved"] == 1).sum())
+                  total = int(len(df_out))
+                  st.markdown("### Métricas agregadas")
+                  m1, m2, m3 = st.columns(3)
+                  m1.metric("Total", f"{total}")
+                  m2.metric("Aprobados", f"{approved_n}")
+                  m3.metric("Riesgosos", f"{risky}")
+  
+                  st.success("Listo. Resultados:")
+                  st.dataframe(df_out.head(50), use_container_width=True)
+  
+                  # Descargar resultados
+                  csv_bytes = df_out.to_csv(index=False).encode("utf-8")
+                  st.download_button(
+                      label="⬇️ Descargar resultados CSV",
+                      data=csv_bytes,
+                      file_name="credipulse_predictions.csv",
+                      mime="text/csv"
+                  )
+          except Exception as e:
+              st.error(f"Error al procesar el CSV: {e}")
+  
+  # --------------------------- 3) Monitoreo simple (Drift) ---------------------
+  with tab_monitor:
+      st.subheader("Monitoreo Simple (Drift de variables)")
+      st.write("Carga distribuciones históricas y compáralas con las actuales.")
+  
+      c1, c2 = st.columns(2)
+      hist_json = c1.file_uploader("Distribución histórica (JSON con counts por categoría)", type=["json"], key="hist")
+      curr_json = c2.file_uploader("Distribución actual (JSON con counts por categoría)", type=["json"], key="curr")
+  
+      example = {"north": 120, "south": 100, "east": 80, "west": 110}
+      with st.expander("Ejemplo de formato JSON"):
+          st.code(json.dumps(example, indent=2), language="json")
+  
+      if hist_json and curr_json:
+          try:
+              hist = json.load(hist_json)
+              curr = json.load(curr_json)
+              df_hist = pd.DataFrame(list(hist.items()), columns=["category", "hist_count"])
+              df_curr = pd.DataFrame(list(curr.items()), columns=["category", "curr_count"])
+              df_merged = df_hist.merge(df_curr, on="category", how="outer").fillna(0)
+              df_merged["hist_pct"] = df_merged["hist_count"] / df_merged["hist_count"].sum()
+              df_merged["curr_pct"] = df_merged["curr_count"] / df_merged["curr_count"].sum()
+              df_merged["abs_diff_pct"] = (df_merged["curr_pct"] - df_merged["hist_pct"]).abs()
+  
+              st.write("Comparación porcentual por categoría:")
+              st.dataframe(df_merged[["category", "hist_pct", "curr_pct", "abs_diff_pct"]]
+                           .sort_values("abs_diff_pct", ascending=False), use_container_width=True)
+  
+              st.write("Distribución histórica vs actual (porcentaje)")
+              chart_df = df_merged.set_index("category")[["hist_pct", "curr_pct"]]
+              st.bar_chart(chart_df)
+  
+              alert_threshold = st.slider("Umbral de alerta (∆ % abs)", 0.00, 0.50, 0.10, 0.01)
+              flagged = df_merged[df_merged["abs_diff_pct"] >= alert_threshold]
+              if not flagged.empty:
+                  st.warning(f"⚠️ Variables con drift ≥ {alert_threshold:.2f}: {', '.join(flagged['category'].tolist())}")
+              else:
+                  st.success("Sin drift relevante según el umbral seleccionado.")
+          except Exception as e:
+              st.error(f"Error leyendo JSON: {e}")
+
+  ✅ Teniendo en cuenta lo aprendido, selecciona la respuesta correcta:
+
+  Streamlit permite crear interfaces web interactivas directamente desde scripts de Python, sin necesidad de escribir HTML o JavaScript.
+    Verdadero
+    Falso
+
+  Veamos un video
+
+  En el siguiente video mostraremos la visualización de modelos en Streamlit de nuestro caso de uso.
+
+  [recurso] DS_M5L4-V2
+  https://vimeo.com/1166033339/d38c78c5f8
+
+  SIGUIENTE
+
+================================================================================
+Cierre [section]
+================================================================================
+Cierre [blocks]
+================================================================================
+  ¡Vamos a recapitular lo aprendido!
+  ¡Vamos a recapitular todo lo que hemos aprendido!
+
+  Al finalizar esta clase, queda claro que disponibilizar un modelo de machine learning es un paso decisivo para que la inteligencia artificial pase de ser una demostración técnica a convertirse en una herramienta de valor real para el negocio. La clase permitió recorrer el proceso completo, desde el diseño de una API funcional hasta la construcción de una interfaz visual capaz de comunicar resultados y habilitar decisiones. En este recorrido se exploraron soluciones complementarias, cada una con sus ventajas, desafíos y contextos de aplicación.
+Uno de los puntos más importantes fue entender el rol de las APIs en la arquitectura moderna de sistemas. Se profundizó en su funcionamiento dentro del esquema cliente-servidor y en cómo permiten abstraer la lógica del modelo para integrarse fácilmente con otros servicios. A partir de ahí, se abordó el uso de
+FastAPI
+como herramienta clave para la creación de endpoints eficientes, incluyendo validación de datos, documentación automática y despliegue con Uvicorn. También se presentó
+PyCaret
+como alternativa rápida para disponibilización automática, destacando su utilidad para entornos de pruebas o prototipado.
+Otro aspecto fundamental fue el desarrollo de una aplicación web con
+Streamlit
+, que permitió no solo cargar y utilizar el modelo, sino también interpretar su comportamiento de forma visual. Esta app combinó dos flujos de uso —predicción online y batch— y sumó paneles de análisis que facilitaron la detección de posibles desviaciones en el tiempo, brindando herramientas concretas para monitorear la estabilidad del sistema. La complementariedad entre la API y esta interfaz visual demostró que disponibilizar un modelo no se trata solo de "servir predicciones", sino de construir productos de machine learning accesibles, robustos y alineados con los procesos reales del negocio.
+En conjunto, estos elementos conforman una mirada práctica, técnica y estratégica sobre la puesta en producción de modelos de machine learning. Lo aprendido en esta clase no solo sienta las bases para disponibilizar modelos en proyectos propios, sino que también habilita conversaciones más profundas con áreas técnicas, de producto o de negocio. Saber cómo transformar un modelo en una solución que puede escalar y ser consumida por otros equipos es uno de los pasos más importantes en el camino hacia una práctica profesional de la ciencia de datos orientada a resultados.
+
+  SIGUIENTE
+
+================================================================================
+Avance de PI [blocks]
+================================================================================
+  ✏️ Consigna
+
+  Realizar el proceso de ingeniería de características.
+  Empezar a entrenar los primeros modelos.
+  Realizar la evaluación de los modelos supervisados, seleccionando el de mejor performance.
+
+  En este avance se generará la
+versión 1.1.0
+y
+V1.0.1
+como se muestra en el gráfico inicial, en la que se abordará el proceso de ingeniería de características y modelamiento, respectivamente. A partir de allí puedes crear las versiones que desees y seguir un flujo que te sea lógico y cómodo.
+ft_ engineering .py
+: Crea la primera componente de nuestro flujo de creación de modelos operativos, del cual se generan los features y se retorna el dataset con el cuál se entrenarán los modelos. Incluye el resultado de: resultan los conjuntos de datos de entrenamiento y evaluación. Se solicita crear pipelines como los siguientes.
+
+  Se deben utilizar funciones como:
+summarize_classification
+y
+build_model
+para procesos que se hagan de forma repetida.
+Utilizar gráficos comparativos para los modelos principales. Tabla resumen con el apartado de evaluación.
+
+  🟡Conocimientos necesarios
+  Ingeniería de características, imputación, tipos de variables, pipelines, modelamiento supervisado.
+  🟡 Tech Stack necesario
+  P
+andas, numpy, sk-learn, feature-engine, seaborn.
+
+================================================================================
+Feedback [blocks]
+================================================================================
+  [recurso]
+  <iframe src="https://airtable.com/embed/appqMsKXhahDwA7lL/pagUns5rEbJFXjbt8/form" frameborder="0" width="100%" height="533"></iframe>
+
+  FIN DE LA LECCIÓN

@@ -1,0 +1,626 @@
+Lecture 10: V2DSM5L10 | Entrenamiento de modelos con Big Data
+Modulo: Fundamentos de nube y ciencia de datos de producción
+SCORM: https://capsulasv2.soyhenry.com/scorm/89836312-2632-415b-9542-c3d111f6338b/scormcontent/index.html
+
+================================================================================
+Inicio [section]
+================================================================================
+Introducción [blocks]
+================================================================================
+  ¡Bienvenidos/as!
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  El
+entrenamiento de modelos de machine learning en entornos de datos masivos
+presenta desafíos muy distintos a los que suelen abordarse en contextos de datasets pequeños o medianos. A medida que aumenta el volumen de información, las herramientas tradicionales dejan de ser suficientes y comienzan a surgir cuellos de botella vinculados con la memoria, el procesamiento y la escalabilidad. Este cambio de escala no es simplemente cuantitativo: exige un rediseño completo del pipeline de datos, desde la preparación hasta el entrenamiento y evaluación de los modelos.
+Esta clase tiene como
+objetivo
+explorar distintas estrategias técnicas para abordar el entrenamiento de modelos en escenarios de Big Data. Se trabajará con herramientas como PySpark y Polars, que permiten procesar y transformar grandes volúmenes de datos de forma eficiente, y se evaluarán enfoques como el entrenamiento por muestreo, el uso de minibatches y el aprendizaje incremental, que ayudan a optimizar el uso de recursos sin comprometer la calidad del modelo. El foco no estará solo en lograr precisión, sino también en analizar el compromiso entre costo computacional y performance del modelo en condiciones reales de operación.
+El desarrollo de esta clase se estructura a partir de un
+caso integrador: AgroVision
+, una empresa que necesita entrenar modelos predictivos utilizando datos agrícolas generados por sensores IoT distribuidos en el campo. Este caso servirá como eje narrativo para aplicar cada técnica, probar distintos enfoques y tomar decisiones arquitectónicas informadas. La lógica de clase no se limita a comparar herramientas, sino a entender cuándo, por qué y cómo conviene usar una u otra, en función del tipo de dato, el entorno de ejecución y los objetivos del sistema.
+A lo largo del recorrido, se pondrá énfasis en construir flujos reproducibles, adaptables y técnicamente sostenibles, partiendo de conjuntos de datos simulados pero realistas, y utilizando librerías ampliamente adoptadas en la industria. La propuesta no es solo escalar los datos, sino también escalar el criterio técnico con el que se enfrentan problemas reales en contextos de datos complejos.
+¡Éxitos! 👩🏽‍💻
+
+  Objetivos de la lección
+💥
+
+  Explorar el entrenamiento de modelos usando PySpark, optimizando el procesamiento distribuido de datos para manejar grandes volúmenes de información de manera eficiente.
+  Implementar técnicas de entrenamiento con Polars, aprovechando su alto rendimiento en la manipulación de datos tabulares y su capacidad para acelerar cálculos en comparación con Pandas.
+  Evaluar métodos de entrenamiento por aproximación como sampling y minibatch, analizando su impacto en la optimización de modelos y reducción de costos computacionales.
+
+  Caso integrador
+
+  AgroVision: Modelos predictivos para monitoreo agrícola en escala masiva
+  AgroVision
+es una empresa que brinda servicios de monitoreo inteligente para grandes extensiones agrícolas mediante sensores IoT instalados en maquinaria y estaciones climáticas distribuidas en el campo. Sus dispositivos generan registros constantes sobre variables como humedad del suelo, temperatura ambiente, presencia de plagas, niveles de riego, tipo de cultivo y rendimiento por parcela. Actualmente,
+AgroVision está en proceso de desarrollar una plataforma de analítica avanzada que permita predecir el rendimiento esperado por zona geográfica y generar alertas tempranas para eventos críticos como sequías, exceso de humedad o condiciones para el desarrollo de enfermedades.
+El principal
+desafío técnico
+radica en la dimensión del volumen de datos y en la necesidad de construir modelos predictivos robustos que puedan entrenarse sobre millones de registros históricos, provenientes de múltiples fuentes heterogéneas y en distintos formatos. El equipo técnico quiere comparar distintas estrategias para entrenar modelos sobre estos datos, evaluar técnicas de procesamiento distribuido, y optimizar el pipeline de datos y entrenamiento para que pueda escalar a entornos de producción sin necesidad de invertir en infraestructura costosa o especializada.
+Durante esta clase, nos pondremos en el lugar del equipo técnico de AgroVision, que debe explorar distintas alternativas para procesar, transformar y modelar estos grandes volúmenes de datos utilizando herramientas como
+Polars, PySpark
+, y técnicas de entrenamiento por aproximación (como
+sampling
+y
+minibatch
+). El objetivo no es solo evaluar la precisión de los modelos, sino también analizar el compromiso entre costo computacional, tiempo de entrenamiento y representatividad de los datos, con vistas a diseñar una arquitectura eficiente y adaptable para procesamiento en escala.
+
+  Dataset
+En el siguiente Drive encontrarás todos los documentos necesarios para las prácticas del caso integrador
+  drive
+  [enlace] https://drive.google.com/drive/folders/1rwAgYlUEwtW4YVFJR48Cp9GCDrxUGp8r?usp=drive_link
+
+  SIGUIENTE
+
+================================================================================
+Desarollo [section]
+================================================================================
+Entrenamiento de modelos en entornos Big Data [blocks]
+================================================================================
+  Desafíos del entrenamiento con grandes volúmenes de datos
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  🤖
+COmpletar desde aca!
+  El
+entrenamiento de modelos sobre grandes volúmenes de datos
+introduce desafíos específicos que no se presentan en contextos tradicionales. Las operaciones de carga, limpieza, transformación y validación se vuelven exponencialmente más costosas cuando el dataset crece en millones de filas y cientos de variables. A diferencia del trabajo con conjuntos moderados, donde las tareas de preprocesamiento y modelado pueden realizarse en memoria utilizando herramientas como Pandas, en entornos de Big Data este enfoque suele resultar inviable por limitaciones de hardware, tiempo de cómputo y tolerancia al fallo.
+Una de las principales
+dificultades
+radica en que muchas herramientas de ciencia de datos asumen que los datos pueden ser cargados completamente en memoria. Esto genera errores críticos o una degradación significativa del rendimiento cuando se excede la capacidad del entorno de ejecución. Además, operaciones que en datasets pequeños tardan segundos —como la codificación de variables categóricas o el escalado de atributos— pueden requerir minutos o incluso horas en volúmenes masivos. El uso de estructuras de datos tradicionales impone una carga innecesaria al sistema y condiciona el diseño del pipeline de aprendizaje automático.
+Otro aspecto central es la necesidad de adaptar los algoritmos de entrenamiento a un contexto donde no todos los datos pueden ser utilizados al mismo tiempo. Técnicas como el
+entrenamiento incremental, los algoritmos en línea o los métodos por lotes
+se vuelven necesarios para evitar saturaciones de memoria y tiempos de cómputo prohibitivos. El
+foco
+ya no está solo en obtener la máxima precisión, sino en
+lograr modelos que puedan ser entrenados, evaluados y actualizados en entornos realistas de ejecución.
+Este cambio implica repensar los objetivos de optimización, considerando el rendimiento como un recurso escaso.
+Finalmente, los
+desafíos
+no se limitan al volumen de datos, sino también a su variedad y velocidad de generación. En muchos casos, los datos provienen de múltiples fuentes heterogéneas y llegan en tiempo real, lo que exige arquitecturas capaces de ingestarlos, transformarlos y entrenar modelos sobre ventanas dinámicas de información. La capacidad de mantener el sistema operativo bajo estas condiciones requiere no solo infraestructura escalable, sino también una planificación técnica que contemple paralelización, tolerancia a fallos y mecanismos eficientes de validación.
+
+  🧩En nuestro caso de uso
+  En el caso de
+AgroVision
+, el equipo se enfrenta a estas limitaciones desde el primer momento. El
+dataset
+original, compuesto por datos agroclimáticos históricos y lecturas de sensores, no puede ser procesado en un entorno tradicional debido a su volumen. Ante esto,
+se decide trabajar con una muestra representativa del conjunto total,
+validando que conserve la distribución de las variables principales.
+Esta decisión les permite comenzar a diseñar los pipelines de entrenamiento en condiciones manejables, sin perder de vista los requerimientos futuros de escalabilidad y generalización.
+
+  Estrategias para entrenar modelos en Big Data
+
+  Cuando se trabaja con datos en escala masiva, el entrenamiento de modelos requiere algo más que potencia de cómputo: exige una estrategia técnica concreta, que contemple la naturaleza de los datos, las capacidades del entorno y los objetivos del sistema. No existe un único enfoque válido, sino un conjunto de decisiones que deben tomarse de forma informada para equilibrar precisión, tiempo de procesamiento y consumo de recursos. El entrenamiento sobre Big Data no busca solamente el mejor modelo, sino el más viable y escalable dentro de las condiciones reales de operación.
+
+  💡Muestreo inteligente
+  Una de las primeras estrategias a considerar es el uso de muestreo inteligente. En vez de entrenar el modelo sobre el total del dataset, se selecciona una muestra representativa —estratificada, aleatoria o secuencial— que conserve la estructura estadística de los datos. Esto permite reducir el volumen procesado sin perder generalización. Si bien el muestreo puede disminuir la precisión marginal del modelo, su impacto suele ser mínimo frente a la ganancia en tiempo y viabilidad computacional. Esta técnica es especialmente útil en fases exploratorias o para pruebas de arquitectura.
+  📶Entrenamiento incremental o por lotes (minibatch)
+  Otra estrategia consiste en aplicar entrenamiento incremental o por lotes (minibatch). En este enfoque, el modelo se entrena progresivamente a medida que recibe fragmentos del dataset. Técnicas como partial_fit en Scikit-learn o algoritmos de descenso por gradiente estocástico permiten actualizar los parámetros del modelo sin necesidad de cargar todos los datos a la vez. Esto no solo mejora el uso de memoria, sino que habilita modelos que se ajustan en tiempo real a nuevas entradas de datos, lo cual es crítico en sistemas de producción continua.
+  🔁Combinaciones de enfoques
+  Por último, puede optarse por combinaciones de enfoques, como pipelines híbridos en los que el preprocesamiento se realiza de forma distribuida y el entrenamiento se realiza con modelos más livianos pero optimizados. Esta estrategia busca aprovechar lo mejor de cada tecnología: procesamiento paralelo con PySpark, transformación eficiente con Polars, y entrenamiento incremental con Scikit-learn. Diseñar estos pipelines requiere planificación y pruebas, pero permite escalar la solución a entornos más exigentes sin rediseñar por completo el flujo de trabajo.
+
+  En el caso de
+AgroVision
+, el equipo aplica una combinación de estas estrategias para avanzar en condiciones reales de ejecución. Trabajan con una muestra del dataset original, aplican preprocesamiento con Polars para minimizar el uso de memoria, y realizan pruebas de entrenamiento incremental utilizando
+partial_fit
+sobre lotes de 100 registros. Además, definen una estrategia de evaluación basada en métricas parciales, que les permite monitorear el desempeño sin tener que esperar la finalización completa del entrenamiento. Este enfoque les permite diseñar un sistema flexible, eficiente y adaptable al crecimiento del volumen de datos.
+
+  SIGUIENTE
+
+================================================================================
+Entrenamiento con PySpark [blocks]
+================================================================================
+  Introducción a PySpark MLlib
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  PySpark
+es la interfaz de Python para Apache Spark, una de las plataformas más utilizadas para procesamiento distribuido de grandes volúmenes de datos. Su módulo de machine learning, conocido como
+MLlib
+, permite construir, entrenar y evaluar modelos sobre datasets distribuidos, manteniendo una sintaxis funcionalmente cercana a las herramientas tradicionales de Python, pero con capacidad para escalar horizontalmente. MLlib está diseñado para trabajar con DataFrames distribuidos, que se comportan de forma similar a un DataFrame de Pandas, pero cuyo contenido se encuentra dividido entre nodos o núcleos de ejecución.
+
+  La
+estructura general de MLlib
+está basada en un flujo de trabajo estandarizado: transformación de datos, vectorización de atributos, definición del modelo, entrenamiento y evaluación. Todos estos pasos pueden encadenarse en un único Pipeline, que puede serializarse, reutilizarse y adaptarse para distintos modelos. MLlib incluye algoritmos comunes como regresión lineal, regresión logística, árboles de decisión, random forest, clustering KMeans y más. Aunque su catálogo no es tan amplio como el de Scikit-learn, está optimizado para el procesamiento en paralelo y la integración con Spark SQL, lo que permite combinar análisis estadístico con aprendizaje automático en una misma plataforma.
+Una de las
+principales ventajas de usar PySpark en entornos Big Data
+es que permite evitar el cuello de botella de la memoria local. Los datos pueden leerse desde sistemas distribuidos como HDFS, S3 o bases NoSQL, y ser transformados parcialmente en cada nodo, sin necesidad de centralizar la operación. Esto hace posible aplicar preprocesamiento, entrenamiento y evaluación sobre datasets que no cabrían en la memoria de una máquina local. Además, PySpark puede ejecutarse en distintos modos:
+Local
+(en una sola máquina con múltiples núcleos),
+En un
+clúster gestionado
+,
+En
+plataformas cloud
+como AWS EMR, GCP Dataproc o Databricks.
+
+  Configuraciones mínimas
+  Para utilizar PySpark en un entorno local de desarrollo, es necesario realizar algunas configuraciones mínimas.
+  Para finalizar...
+  Una vez configurado, PySpark puede ejecutarse directamente desde un script o desde notebooks compatibles como Jupyter o VS Code.
+  Instalación
+  La instalación se puede hacer mediante
+pip install pyspark
+, lo que descarga tanto la interfaz de Python como los binarios de Spark. Sin embargo, Spark depende de Java para ejecutar sus procesos. Por eso, también se requiere una versión de Java instalada en el sistema. Por ejemplo, en entornos Linux puede instalarse con el comando
+sudo apt install openjdk-17-jdk -y
+.
+
+  🧩En nuestro caso integrador
+  En el caso de
+AgroVision
+, el equipo opta por trabajar con PySpark MLlib para su primer experimento de entrenamiento distribuido.
+Aprovechando que ya cuentan con conocimientos previos sobre Apache Spark —incorporados en una etapa anterior del proyecto— deciden reutilizar esa base para modelar su primer flujo de entrenamiento sobre un subconjunto del dataset agroclimático.
+Esta elección les permite procesar grandes volúmenes de datos sin depender de un servidor con GPU o infraestructura compleja, y diseñar una arquitectura reproducible que escale en etapas futuras.
+
+  Flujo de trabajo de MLlib
+
+  El flujo de trabajo en MLlib sigue una lógica clara y modular que facilita la implementación de modelos de machine learning sobre datos distribuidos.
+
+  Todo comienza con la carga y transformación de los datos: los archivos se leen en formato CSV, Parquet u otros, y se cargan como Spark DataFrames. Luego se aplican transformaciones necesarias sobre las columnas, como casteo de tipos, creación de columnas dummy, normalización de variables o tratamiento de valores faltantes. Estas operaciones son distribuidas por Spark de forma automática, ejecutándose en paralelo según la configuración del entorno.
+  Una vez que los datos están listos, se procede a la
+vectorización
+, que es un paso clave en MLlib. Dado que los modelos requieren un único campo que represente todas las características del dataset, se utiliza la
+clase
+VectorAssembler
+para combinar múltiples columnas numéricas en un solo vector de entrada. Este vector se almacena en una nueva columna llamada
+features
+, que es utilizada tanto por el modelo como por las funciones de evaluación. Esta separación entre datos originales y vectores permite mantener trazabilidad sobre los pasos realizados.
+  El siguiente paso es la definición del modelo. MLlib ofrece implementaciones escalables de algoritmos clásicos como regresión lineal, regresión logística, árboles de decisión, clustering KMeans y más.
+La configuración del modelo incluye parámetros como la columna objetivo, el número de iteraciones, el método de regularización y el tipo de salida. Una vez definido, el modelo se entrena utilizando el método
+.fit()
+sobre el conjunto de entrenamiento. Spark se encarga de distribuir las operaciones de entrenamiento entre todos los nodos disponibles.
+  Un Pipeline es un objeto que contiene transformadores y estimadores en secuencia: por ejemplo, un
+VectorAssembler
+, seguido de un modelo de regresión. Esta abstracción permite guardar el flujo completo como un solo objeto serializable, que puede aplicarse luego a nuevos datos sin reescribir el código. También permite estandarizar la lógica entre distintos modelos y mantener buenas prácticas de ingeniería de datos.
+
+  🧩En nuestro caso de uso
+  En el caso de
+AgroVision
+, el equipo desarrolla un pipeline completo que incluye:
+Lectura del dataset simulado,
+Transformación de variables categóricas (riego, región, cultivo),
+Creación del vector de características y entrenamiento de un modelo de regresión lineal.
+Este pipeline se prueba con particiones aleatorias del dataset y se ejecuta en modo local.
+Al observar la trazabilidad de cada paso en el log de Spark, el equipo valida que las operaciones se distribuyen entre núcleos, lo que reduce los tiempos de ejecución y simula el comportamiento futuro en un clúster real.
+
+  Entrenamiento y evaluación distribuida
+
+  El entrenamiento distribuido con
+PySpark MLlib
+implica dividir los datos en múltiples particiones y procesarlos en paralelo durante las fases de ajuste de parámetros y cálculo de errores. Esto permite trabajar con datasets que exceden la memoria física de una máquina individual, ya que cada nodo o núcleo procesa una fracción del total.
+Esta arquitectura permite escalar de forma horizontal el entrenamiento de modelos, especialmente útiles cuando se trabaja con grandes volúmenes de registros y múltiples variables.
+Para dividir los datos entre nodos,
+Spark
+utiliza su propio sistema de particionamiento interno, que puede personalizarse o dejarse en modo automático. Las funciones de transformación y entrenamiento respetan esta partición y procesan cada bloque por separado. Durante el entrenamiento, los resultados parciales de cada partición se agregan según el tipo de modelo, lo que permite mantener la coherencia en las métricas sin centralizar toda la información.
+Este enfoque reduce el cuello de botella y mejora la eficiencia general del sistema.
+
+  Una vez entrenado el modelo,
+MLlib
+permite realizar la evaluación sobre el conjunto de prueba utilizando funciones de predicción y cálculo de métricas. Estas métricas, como
+RMSE
+,
+R²
+o
+clasificación binaria
+, también se calculan en forma distribuida.
+Finalmente,
+el modelo entrenado puede guardarse en formato serializado con
+.save()
+y luego
+cargarse nuevamente con
+.load()
+para ser reutilizado en producción o integrado a un pipeline de inferencia. Esta
+capacidad de persistencia
+permite separar el entrenamiento de la ejecución, facilitando la integración con otros servicios.
+
+  🧩En nuestro caso de uso
+  En
+AgroVision
+, esta comparación es clave para tomar decisiones informadas sobre qué tecnología usar en cada etapa del proceso. El
+equipo
+documenta
+las diferencias de rendimiento entre PySpark y Scikit-learn, y
+valida
+que el entrenamiento distribuido no solo es más rápido, sino que escala mejor frente a volúmenes mayores.
+Esta evidencia refuerza su decisión de continuar desarrollando el pipeline sobre Spark, con vistas a migrarlo a un clúster productivo en etapas futuras del proyecto.
+
+  SIGUIENTE
+
+================================================================================
+Entrenamiento con Polars [blocks]
+================================================================================
+  Introducción a Polars
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  Polars
+es una
+biblioteca de procesamiento de datos en memoria
+diseñada para ofrecer alta performance sobre estructuras tabulares, posicionándose como una alternativa moderna a Pandas.
+Su
+arquitectura
+se basa en un modelo columnar, lo que permite un acceso mucho más eficiente a las columnas durante operaciones de lectura, filtrado y transformación.
+
+  🤖
+COmpletar desde aca!
+  Además, implementa un motor de ejecución
+“lazy”
+por defecto, es decir, no ejecuta las operaciones inmediatamente, sino que las acumula y optimiza como un plan completo antes de evaluarlo.
+Este enfoque mejora significativamente los tiempos de procesamiento en pipelines complejos.
+Una de las
+diferencias
+más relevantes
+entre Polars y Pandas
+es su capacidad de paralelismo nativo. Mientras que
+Pandas
+opera de forma secuencial en un solo hilo,
+Polars
+aprovecha múltiples núcleos del procesador para distribuir tareas automáticamente. Esto lo convierte en una opción muy eficiente en entornos locales donde no se cuenta con procesamiento distribuido como Spark, pero donde se requiere mayor velocidad o se manejan datasets moderadamente grandes. Esta ventaja se mantiene incluso en tareas comunes como agregaciones, joins o conversiones de tipo.
+Polars
+también está diseñado para integrarse fácilmente con ecosistemas de ciencia de datos en Python:
+Permite importar y exportar datos en múltiples formatos (CSV, Parquet, JSON, etc.) y ofrece una API muy similar a Pandas, lo que facilita su adopción.
+Aunque su ecosistema de herramientas y documentación aún está en crecimiento, ya cuenta con soporte para operaciones avanzadas, como expresiones vectorizadas, agrupamientos jerárquicos y joins complejos, sin sacrificar performance.
+Además, puede trabajar tanto en modo eager (evaluación inmediata) como lazy, según lo requiera el flujo de trabajo.
+
+  Elegir Polars tiene sentido en escenarios donde se necesita un punto medio entre Pandas y PySpark:
+más rápido y escalable que el primero, pero sin la complejidad de configurar un clúster como en el segundo.
+
+  Resulta especialmente útil en entornos de desarrollo con recursos limitados
+(como notebooks locales) o
+cuando se trabaja con subconjuntos grandes de datos que aún no justifican una arquitectura distribuida.
+También es una excelente herramienta de exploración previa al escalado.
+
+  🧩En nuestro caso de uso
+  En el caso de
+AgroVision
+, el equipo utiliza Polars como solución intermedia para el preprocesamiento del dataset antes de entrenar un modelo.
+Aprovechan su capacidad de paralelismo para realizar transformaciones complejas —como codificación de variables categóricas, filtrado por región y cálculo de estadísticas por cultivo— sin depender de Spark.
+La similitud con Pandas les permite migrar scripts existentes sin reescribir completamente el código, mientras que la mejora en tiempos de ejecución valida su elección como paso previo al procesamiento distribuido.
+
+  Preparación y procesamiento de datos
+
+  El
+preprocesamiento de datos
+es una de las etapas más costosas en términos de tiempo y recursos en cualquier flujo de machine learning, y su impacto se amplifica en entornos con grandes volúmenes de datos.
+Polars
+permite abordar esta etapa de forma eficiente gracias a su arquitectura columnar y a la ejecución paralela por defecto. Las operaciones como lectura, filtrado, transformación, agregación y combinación de datasets pueden ejecutarse en paralelo y optimizarse en conjunto cuando se utiliza el modo lazy. Esto no solo mejora la performance, sino que reduce significativamente el uso de memoria en comparación con Pandas.
+
+  [codigo]
+  import polars as pl
+  
+  # Cargar el dataset desde el archivo CSV
+  df = pl.read_csv('/content/agrovision_dataset_sample.csv')
+  
+  print("DataFrame cargado desde 'agrovision_dataset_sample.csv':")
+  display(df.head())
+
+  Durante la lectura de grandes datasets,
+Polars
+permite cargar archivos CSV, Parquet o JSON con múltiples opciones de inferencia de tipos y manejo de nulos. Estas operaciones están optimizadas internamente y no requieren que el archivo sea cargado completo en memoria antes de procesarlo.
+A diferencia de
+Pandas
+, que realiza cada operación línea por línea en tiempo real,
+Polars
+puede construir una serie de operaciones encadenadas y ejecutarlas de forma conjunta, lo que elimina pasos intermedios y minimiza las copias de datos innecesarias.
+
+  La
+limpieza y transformación de los datos
+se puede realizar utilizando expresiones vectorizadas, lo que evita el uso de bucles y mejora la legibilidad del código. Por
+ejemplo
+, la codificación de variables categóricas, la creación de columnas derivadas, la normalización de valores o el filtrado condicional se pueden implementar de forma declarativa. Estas expresiones son compiladas y ejecutadas de forma eficiente por el motor de Polars, lo que permite escalar el preprocesamiento a volúmenes considerables sin necesidad de clústeres ni frameworks complejos.
+
+  💡Un
+aspecto interesante
+es la posibilidad de comparar directamente el rendimiento entre Polars y Pandas sobre el mismo conjunto de datos. En tareas como agrupamientos, joins o estadísticas por grupo, Polars puede ser hasta 10 veces más rápido que Pandas, especialmente en equipos con múltiples núcleos.
+Esta diferencia se vuelve especialmente relevante cuando el preprocesamiento representa una proporción importante del tiempo total de ejecución, como ocurre en proyectos de Big Data.
+
+  🧩En nuestro caso de uso
+  En
+AgroVision,
+el equipo realiza la lectura y transformación del dataset simulado utilizando tanto Pandas como Polars.
+Documentan
+el tiempo requerido para operaciones como filtrado por región, generación de variables dummy y agregaciones por tipo de cultivo. Los
+resultados
+muestran que, a igual volumen de datos, Polars completa el flujo de preprocesamiento en menos de la mitad del tiempo, con menor consumo de memoria. Esta
+evidencia técnica
+respalda la decisión de adoptar Polars como herramienta estable dentro del pipeline de preparación de datos.
+
+  Integración con librerías de ML
+
+  Si bien Polars no cuenta con su propio módulo de machine learning, su integración con librerías como
+Scikit-learn
+o
+PyTorch
+es directa a través de la conversión de estructuras de datos. Un
+Polars DataFrame
+puede convertirse fácilmente en un
+array de NumPy
+o en un
+DataFrame de Pandas
+, lo que permite utilizar cualquier modelo ya entrenado o crear nuevos flujos sin modificar los algoritmos.
+Esta interoperabilidad es clave para insertar Polars en flujos de ML ya existentes sin necesidad de reconstruir toda la lógica desde cero.
+
+  [codigo]
+  print("\n--- Número de filas antes de eliminar duplicados ---")
+  print(f"Filas originales: {len(df)}")
+  
+  # Eliminar filas completamente duplicadas
+  df_cleaned = df.unique()
+  
+  print("\n--- Número de filas después de eliminar duplicados ---")
+  print(f"Filas después de unique(): {len(df_cleaned)}")
+  
+  print("\nDataFrame después de eliminar duplicados (primeras 5 filas):")
+  display(df_cleaned.head())
+
+  [codigo]
+  --- Número de filas antes de eliminar duplicados ---
+  Filas originales: 1000
+  
+  --- Número de filas después de eliminar duplicados ---
+  Filas después de unique(): 1000
+  
+  DataFrame después de eliminar duplicados (primeras 5 filas):
+  shape: (5, 8)
+
+  Durante la preparación de los datos para el entrenamiento,
+Polars
+puede encargarse de todas las transformaciones pesadas: lectura del archivo, selección de columnas, normalización, codificación categórica y agrupamiento. Una vez finalizado este proceso, el DataFrame puede convertirse en un array NumPy mediante
+.to_numpy()
+o exportarse como Pandas con
+.to_pandas()
+. Esto permite aplicar cualquier modelo disponible en Scikit-learn utilizando como entrada datos ya optimizados en tiempo y memoria, sin perder flexibilidad ni compatibilidad.
+
+  Ventajas de este enfoque:
+
+  Permite utilizar Polars como un acelerador de preprocesamiento dentro de pipelines ya existentes.
+  Permite validar modelos en entornos donde Pandas sería muy lento o incluso inviable.
+  Permite comparar el impacto real del procesamiento sobre la calidad del modelo y su tiempo de entrenamiento, ya que los datos finales son exactamente los mismos en ambos casos. Esta comparación es especialmente útil en entornos de enseñanza o evaluación técnica.
+
+  Además,
+Polars
+puede ser visto como un paso intermedio antes de escalar el flujo a PySpark. Su capacidad para manejar datos más grandes que Pandas, sin necesidad de un clúster, permite diseñar flujos realistas que pueden migrarse progresivamente a arquitecturas distribuidas. En este sentido, su uso prepara conceptualmente al equipo para trabajar con datos en escala sin complejidad innecesaria, y con herramientas que ya forman parte del ecosistema productivo de Python.
+
+  🧩En nuestro caso de uso
+  En
+AgroVision
+, el equipo procesa el dataset completo con Polars, transforma las variables necesarias y convierte el resultado a formato NumPy para entrenar un modelo de regresión con Scikit-learn. Usan el mismo dataset que en la prueba con PySpark, lo que les permite comparar los tiempos de entrenamiento, el uso de memoria y las métricas del modelo en condiciones controladas.
+Esta experiencia les permite demostrar que, con un flujo bien optimizado, se puede alcanzar una performance muy cercana a la de Spark sin necesidad de escalar aún a procesamiento distribuido.
+
+  SIGUIENTE
+
+================================================================================
+Métodos de entrenamiento por aproximación [blocks]
+================================================================================
+  Entrenamiento con muestreo (sampling)
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  🤖
+COmpletar desde aca!
+  El entrenamiento de modelos sobre conjuntos de datos muestreados es una estrategia clásica para reducir la carga computacional sin perder representatividad.
+En entornos de Big Data, donde los datasets superan millones de filas, aplicar modelos sobre la totalidad puede ser prohibitivo. El sampling permite seleccionar subconjuntos que conserven las propiedades estadísticas clave del conjunto original. Esto posibilita realizar entrenamientos más rápidos y pruebas frecuentes, fundamentales durante las etapas iterativas del desarrollo.
+Existen distintas técnicas de muestreo, cada una con ventajas y riesgos.
+
+  El
+muestreo aleatorio
+simple selecciona registros de forma uniforme, ideal cuando se busca una distribución general sin sesgos.
+  El
+muestreo estratificado
+, en cambio, asegura que ciertas variables (por ejemplo, tipo de cultivo, región o clase objetivo) mantengan su proporción en la muestra, lo cual es vital en problemas con clases desbalanceadas.
+  El
+muestreo sistemático o por conglomerados
+, aunque menos comunes en ML tradicional.
+
+  Entrenar sobre muestras permite validar modelos en menos tiempo y con menor consumo de recursos.
+Sin embargo, si la muestra no está bien construida, el modelo puede generalizar mal o aprender sesgos no presentes en el conjunto total. Por eso, se recomienda validar siempre el desempeño del modelo sobre un conjunto externo o sobre una segunda muestra independiente. Además, es importante evaluar el efecto del tamaño de la muestra: a mayor tamaño, mayor representatividad, pero también mayor costo computacional.
+
+  El muestreo no reemplaza al entrenamiento completo,
+pero sí lo
+complementa. Sirve como técnica de exploración
+,
+validación de arquitectura
+,
+tuning de hiperparámetros
+o
+selección de variables.
+Una vez estabilizado el flujo, se puede escalar a entrenamiento total si el entorno lo permite. Esta estrategia progresiva permite avanzar sin necesidad de infraestructura sofisticada desde el inicio.
+
+  Minibatch y entrenamiento incremental
+
+  Las técnicas de entrenamiento por minibatch e incremental
+se basan en la idea de dividir el dataset en fragmentos más pequeños que puedan procesarse de forma secuencial. En lugar de utilizar toda la información de una sola vez, el modelo se ajusta progresivamente a medida que recibe nuevos bloques de datos.
+Este enfoque no solo reduce el uso de memoria, sino que permite construir modelos que pueden adaptarse dinámicamente a nuevas entradas, siendo especialmente útiles en flujos de datos o sistemas en línea.
+
+  ➡️Entrenamiento por minibatch
+  Es común en modelos basados en descenso por gradiente.
+Se define un tamaño de lote (batch size) y el modelo actualiza sus parámetros a partir del error cometido en ese subconjunto. Esta técnica introduce una mayor frecuencia de actualización, permitiendo una convergencia más rápida o más estable, según el problema.
+En la práctica, elegir el tamaño de batch correcto es clave: batches pequeños favorecen la velocidad pero pueden generar ruido; batches grandes son más estables pero requieren más memoria.
+  ➡️Aprendizaje incremental
+  El aprendizaje incremental, o aprendizaje en línea, va un paso más allá: no necesita disponer de todos los datos al inicio.
+El modelo se entrena a medida que los datos llegan, con métodos como
+partial_fit()
+en
+SGDRegressor
+. Este enfoque es ideal en contextos donde los datos se generan continuamente, como logs, sensores o interacciones de usuarios. También es útil cuando se entrena en dispositivos con poca capacidad, como notebooks sin GPU o entornos embedded.
+  🧩En nuestro caso de uso
+  En
+AgroVision
+, el equipo implementa un flujo de entrenamiento incremental con
+SGDRegressor
+, procesando el dataset en lotes de 100 registros. Utilizan una muestra estratificada como base y simulan un entorno en el que los datos llegan en tandas. El modelo se actualiza con cada batch mediante
+partial_fit()
+, y se registran las métricas tras cada iteración. Los resultados muestran una mejora progresiva en la precisión y una caída significativa en el tiempo de entrenamiento respecto al modelo tradicional.
+
+  Compromiso entre velocidad y exactitud
+
+  Una de las decisiones más críticas al diseñar modelos en Big Data es encontrar el equilibrio adecuado entre velocidad de entrenamiento y precisión del modelo. En muchos casos, pequeñas mejoras en métricas como
+R²
+o
+accuracy
+implican un costo computacional alto, que puede ser injustificado frente al contexto de uso. Por eso, el compromiso entre exactitud y eficiencia debe ser evaluado no solo desde lo técnico, sino también desde lo operativo y lo económico.
+Entrenar
+modelos por muestreo o en batches
+generalmente implica alguna pérdida de precisión, ya que el modelo no ve la totalidad de los datos. Sin embargo, esta pérdida suele ser marginal cuando la muestra está bien diseñada o cuando el modelo se adapta progresivamente. Lo que se gana, en cambio, es enorme: reducción del tiempo de cómputo, menor uso de memoria, posibilidad de ejecutar múltiples variantes, y adaptabilidad a distintos entornos de ejecución.
+
+  El diseño de este compromiso depende del objetivo del modelo.
+En sistemas de producción en tiempo real, donde las decisiones deben tomarse en segundos, priorizar la velocidad puede ser más importante que una precisión absoluta.
+En cambio, en modelos offline para análisis crítico, puede ser más razonable invertir más tiempo en entrenamiento. Lo importante es que esta decisión esté justificada técnicamente y acompañada de métricas que midan ambos aspectos.
+
+  Medir y visualizar este compromiso permite:
+  When we show up to the present moment with all of our senses, we invite the world to fill us with joy. The pains of the past are behind us. The future has yet to unfold. But the now is full of beauty simply waiting for our attention.
+
+  Tomar decisiones informadas.
+  Comparar modelos entrenados con datasets completos, muestreados e incrementales
+permite identificar el punto de equilibrio donde la pérdida de precisión no compensa el aumento del costo.
+
+  Este análisis es clave en proyectos donde el despliegue eficiente es tan importante como la calidad del algoritmo.
+
+  🧩En nuestro caso de uso
+  En
+AgroVision
+, el equipo grafica el desempeño de tres variantes de su modelo: entrenamiento completo, entrenamiento sobre muestra, y entrenamiento incremental. Observan que la diferencia en R² entre los tres modelos es menor al 3%, pero el tiempo de entrenamiento del modelo incremental es cinco veces menor que el modelo completo. Esta evidencia les permite tomar una decisión basada en datos, optando por el modelo más eficiente sin comprometer la utilidad del sistema.
+
+  Combinación de técnicas
+
+  En entornos complejos, rara vez una sola técnica es suficiente.
+Combinar estrategias de entrenamiento por aproximación permite diseñar pipelines más robustos, flexibles y adaptables.
+🧩
+Por ejemplo, se puede aplicar muestreo para seleccionar los datos iniciales, entrenamiento incremental para ajustar el modelo por lotes, y evaluación periódica para validar la evolución del aprendizaje. Esta combinación permite avanzar de forma controlada, mitigando los riesgos de sobreajuste y los cuellos de botella de recursos.
+Una combinación efectiva puede comenzar con un muestreo estratificado que asegure representatividad.
+Luego, se divide esta muestra en batches y se entrena el modelo de forma incremental, actualizando parámetros con cada lote. Paralelamente, se reserva una parte del conjunto para validación fija, contra la cual se testea el modelo tras cada iteración. De esta manera, se integran las fortalezas de cada técnica: velocidad, adaptabilidad, y control de calidad.
+
+  Este
+enfoque híbrido
+es especialmente útil en proyectos donde se parte de recursos limitados pero se apunta a una escalabilidad futura. Además, permite establecer mecanismos de aprendizaje continuo, donde el modelo se reentrena periódicamente a medida que se recolectan nuevos datos. Incluso puede facilitar la migración a entornos distribuidos: lo que comienza como un flujo local con Polars e incremental learning puede luego escalar a Spark o plataformas cloud manteniendo la lógica base.
+
+  Combinar técnicas no solo mejora la performance técnica, sino que fortalece la arquitectura general del sistema.
+Permite abstraer la lógica de entrenamiento de las limitaciones del entorno y prepara al pipeline para adaptarse a distintos volúmenes, tiempos o costos de ejecución.
+
+  🧩En nuestro caso integrador
+  En
+AgroVision
+, el equipo diseña un pipeline que combina sampling estratificado, entrenamiento incremental y validación fija. Este flujo les permite prototipar el modelo en notebooks locales, con tiempos de respuesta ágiles y control del rendimiento en cada iteración.
+Más adelante, planean escalar la misma lógica a Spark, manteniendo la estructura y simplemente cambiando el motor de ejecución.
+Esta arquitectura les da flexibilidad sin comprometer la calidad técnica.
+
+  SIGUIENTE
+
+================================================================================
+Cierre [section]
+================================================================================
+Cierre [blocks]
+================================================================================
+  ¡Vamos a recapitular lo aprendido!
+  ¡Vamos a recapitular todo lo que hemos aprendido!
+
+  A lo largo de esta clase se abordaron los principales desafíos técnicos y estratégicos del
+entrenamiento de modelos en contextos de Big Data.
+Lejos de enfocarse únicamente en la mejora de métricas o la comparación de herramientas, el recorrido se centró en cómo adaptar los procesos de machine learning a entornos donde el volumen, la velocidad y la escalabilidad son factores determinantes. La idea de “entrenar mejor” no se limita a la calidad del algoritmo, sino que incorpora una mirada crítica sobre los recursos disponibles, la arquitectura del sistema y los objetivos del modelo en producción.
+No siempre es necesario usar todos los datos:
+el entrenamiento por muestreo, incremental o por lotes permite construir modelos robustos con menor carga computacional. Estas técnicas no son atajos, sino decisiones informadas para optimizar el tiempo y los recursos.
+El procesamiento distribuido no es el único camino:
+herramientas como Polars ofrecen un punto intermedio entre Pandas y PySpark, permitiendo escalar sin necesidad de clústeres desde el inicio. Elegir la herramienta adecuada es una decisión arquitectónica tanto como técnica.
+Cada técnica tiene un contexto de uso específico:
+desde el sampling hasta el aprendizaje incremental, pasando por la combinación de enfoques, todas responden a necesidades distintas. Entender cuándo y por qué usarlas es parte del criterio profesional.
+La eficiencia también es una métrica:
+comparar tiempos, consumo de memoria y escalabilidad debe formar parte del análisis, junto con métricas como R² o accuracy. En entornos reales, un modelo ligeramente menos preciso pero más rápido o estable suele ser preferible.
+Esta clase tenía el objetivo de mostrar que en el mundo real los modelos conviven con restricciones, prioridades y decisiones de arquitectura. Adoptar un enfoque flexible, iterativo y consciente del contexto permite construir sistemas que no solo funcionen, sino que escalen, se mantengan y aporten valor sostenible. El criterio técnico no está solo en el código, sino en las elecciones que se toman antes, durante y después del entrenamiento.
+
+  SIGUIENTE
+
+================================================================================
+Homework [blocks]
+================================================================================
+  👩🏽‍💻Contexto:
+  When we show up to the present moment with all of our senses, we invite the world to fill us with joy. The pains of the past are behind us. The future has yet to unfold. But the now is full of beauty simply waiting for our attention.
+
+  Una
+cadena de retail multicanal
+desea predecir si un cliente realizará una compra de alto valor en el próximo mes. Para esto, pone a disposición un dataset con información histórica sobre tipo de canal, categoría de productos consumidos, antigüedad del cliente, uso de cupones y comportamiento de compra.
+
+  ✏️Consigna:
+  When we show up to the present moment with all of our senses, we invite the world to fill us with joy. The pains of the past are behind us. The future has yet to unfold. But the now is full of beauty simply waiting for our attention.
+
+  El
+objetivo
+es
+construir un modelo de clasificación binaria que permita anticipar estos casos y activar campañas de fidelización.
+El enfoque de esta actividad es técnico:
+además de construir el modelo, se deberá comparar cómo varía su desempeño al procesar los datos y entrenar utilizando herramientas de distinto nivel de escalabilidad (Pandas, Polars, PySpark).
+También se evaluará cómo aplicar técnicas de aproximación para acelerar los flujos de entrenamiento en contextos de gran volumen.
+
+  Dataset Homework
+  DRIVE
+  [enlace] https://drive.google.com/drive/folders/1O9A3NaZc8Uo9kAnssE7yL5FEte_b264I?usp=drive_link
+
+  Archivo
+Descripción
+dataset_retail_homework.csv
+Dataset con 50.000 registros sobre comportamiento de clientes en retail. Incluye variables categóricas, numéricas y una variable objetivo binaria:
+compra_mayor
+.
+Scripts base
+Pueden generarse para Pandas, Polars y PySpark según necesidad docente o estudiantil.
+
+  🎯 Requisitos mínimos (obligatorios)
+  When we show up to the present moment with all of our senses, we invite the world to fill us with joy. The pains of the past are behind us. The future has yet to unfold. But the now is full of beauty simply waiting for our attention.
+
+  Cargar y explorar el dataset
+dataset_retail_homework.csv
+Revisar la estructura general y tipo de variables.
+Identificar la distribución de la variable objetivo
+compra_mayor
+.
+Preprocesamiento:
+Codificación de variables categóricas (
+canal_venta
+,
+categoria_producto
+,
+uso_cupon
+).
+Estandarización de variables numéricas.
+División en conjunto de entrenamiento y test (80/20).
+Entrenamiento de modelo de clasificación binaria utilizando:
+Scikit-learn con procesamiento previo en
+Pandas
+.
+Scikit-learn con procesamiento previo en
+Polars
+.
+PySpark MLlib (VectorAssembler + LogisticRegression).
+Evaluación de resultados para cada enfoque:
+Métricas: accuracy, precision, recall, f1-score.
+Tiempos de ejecución relativos.
+Comparación técnica entre herramientas utilizadas:
+Diferencias en rendimiento, sintaxis, facilidad de uso.
+Consideraciones sobre escalabilidad en un entorno real.
+
+  ⭐ Extracredit
+
+  > Aplicar técnicas de entrenamiento por aproximación, como:
+Muestreo estratificado (por categoría de producto o canal).
+Entrenamiento incremental con
+SGDClassifier
+(
+partial_fit
+).
+Simulación de entrenamiento por lotes (minibatch).
+> Comparar el desempeño entre modelo entrenado con dataset completo y con una muestra del 30%, en términos de métricas y tiempos.
+> Guardar y reutilizar el modelo:
+Exportarlo en
+.pkl
+(Scikit-learn) o
+.model
+(PySpark).
+Cargarlo y aplicar predicciones sobre nuevos datos simulados.
+
+  SIGUIENTE
+
+================================================================================
+Feedback [blocks]
+================================================================================
+  [recurso]
+  <iframe src="https://airtable.com/embed/appqMsKXhahDwA7lL/pagUns5rEbJFXjbt8/form" frameborder="0" width="100%" height="533"></iframe>
+
+  FIN DE LA LECCIÓN

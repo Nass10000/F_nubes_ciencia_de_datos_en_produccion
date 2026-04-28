@@ -1,0 +1,72 @@
+[
+  {
+    "order": 1,
+    "title": "V2DSM5L1 | Gestión de experimentos",
+    "lecture_id": "90b32091-ed5c-4f8f-965f-29cf527f45ad",
+    "video_id": "528e1b95-aced-4c9c-9f6d-20e768cd9678",
+    "file": "lectures_txt\\lecture_01_Gesti_n_de_experimentos.txt"
+  },
+  {
+    "order": 2,
+    "title": "V2DSM5L2 | Control de versiones",
+    "lecture_id": "07a7d884-8295-4479-9fd6-dda6184b3098",
+    "video_id": "408ca0ac-e839-46a4-89f2-095e8b40ddc8",
+    "file": "lectures_txt\\lecture_02_Control_de_versiones.txt"
+  },
+  {
+    "order": 3,
+    "title": "V2DSM5L3 | Pipeline de un modelo de ML",
+    "lecture_id": "aa95b89f-1f63-44a4-9ae0-d444257869d4",
+    "video_id": "ff5fc4a9-2896-48c0-a913-d1526645ccfb",
+    "file": "lectures_txt\\lecture_03_Pipeline_de_un_modelo_de_ML.txt"
+  },
+  {
+    "order": 4,
+    "title": "V2DSM5L4 | Disponibilización de un modelo de ML",
+    "lecture_id": "eea8e47b-73da-4104-8173-ce2f462ea390",
+    "video_id": "f55ed465-73a6-4239-b6c8-26d02a87b057",
+    "file": "lectures_txt\\lecture_04_Disponibilizaci_n_de_un_modelo_de_ML.txt"
+  },
+  {
+    "order": 5,
+    "title": "V2DSM5L5 | Aplicaciones Basadas en Contenedores en Docker",
+    "lecture_id": "3ce5f1ce-0928-4095-958e-c5c9e143806d",
+    "video_id": "6e484698-7490-4874-a73a-8aa21f091ea7",
+    "file": "lectures_txt\\lecture_05_Aplicaciones_Basadas_en_Contenedores_en_Docker.txt"
+  },
+  {
+    "order": 6,
+    "title": "V2DSM5L6 | Introducción al MLOps",
+    "lecture_id": "878f30c5-cfd0-4fd2-ae37-40197ae5f97a",
+    "video_id": "a51495bf-cc61-4f50-99af-3657912ed6be",
+    "file": "lectures_txt\\lecture_06_Introducci_n_al_MLOps.txt"
+  },
+  {
+    "order": 7,
+    "title": "V2DSM5L7 | CI/CD para ML",
+    "lecture_id": "f0380a18-a8f8-4170-833e-dfadc949bb15",
+    "video_id": "baeef17b-8568-41a2-a56f-26a9cafe8185",
+    "file": "lectures_txt\\lecture_07_CI_CD_para_ML.txt"
+  },
+  {
+    "order": 8,
+    "title": "V2DSM5L8 | Estructuración de proyectos de ML",
+    "lecture_id": "fbe643ec-fda0-425e-bde9-32d3dba291ad",
+    "video_id": "44c320b2-2735-441e-a629-a01407fa1f5f",
+    "file": "lectures_txt\\lecture_08_Estructuraci_n_de_proyectos_de_ML.txt"
+  },
+  {
+    "order": 9,
+    "title": "V2DSM5L9 | Introducción a la computación en la nube",
+    "lecture_id": "cf76c985-c12d-420c-ba39-849b2f0abc8e",
+    "video_id": "84352460-e226-4053-946c-eb673babcd98",
+    "file": "lectures_txt\\lecture_09_Introducci_n_a_la_computaci_n_en_la_nube.txt"
+  },
+  {
+    "order": 10,
+    "title": "V2DSM5L10 | Entrenamiento de modelos con Big Data",
+    "lecture_id": "18f296fd-6bba-4e09-85c1-7ed594dc7eaa",
+    "video_id": "89836312-2632-415b-9542-c3d111f6338b",
+    "file": "lectures_txt\\lecture_10_Entrenamiento_de_modelos_con_Big_Data.txt"
+  }
+]

@@ -1,0 +1,870 @@
+Lecture 9: V2DSM5L9 | Introducción a la computación en la nube
+Modulo: Fundamentos de nube y ciencia de datos de producción
+SCORM: https://capsulasv2.soyhenry.com/scorm/84352460-e226-4053-946c-eb673babcd98/scormcontent/index.html
+
+================================================================================
+Inicio [section]
+================================================================================
+Introducción [blocks]
+================================================================================
+  ¡Bienvenidos a la lecture!
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  La
+computación en la nube
+se ha consolidado como la base de la infraestructura tecnológica moderna. Desde startups hasta corporaciones globales, cada vez más organizaciones adoptan servicios cloud para lograr escalabilidad, agilidad y eficiencia operativa. Esta transición no solo responde a una cuestión de costos, sino a una necesidad estratégica de adaptarse a entornos cambiantes y a una demanda creciente de procesamiento y almacenamiento de datos distribuidos.
+En esta clase exploraremos los fundamentos técnicos y arquitectónicos que permiten comprender cómo funciona la nube, qué tipos de servicios ofrece, y de qué manera se integran en soluciones reales. Además, aprenderemos a distinguir entre diferentes
+modelos de servicio
+(IaaS, PaaS, SaaS), y a evaluar proveedores como
+AWS
+,
+Google Cloud
+y
+Azure
+, reconociendo sus ventajas, limitaciones y puntos en común.
+La práctica estará centrada en el análisis comparativo de
+servicios de almacenamiento
+,
+tipos de bases de datos distribuidas
+y
+enfoques de arquitectura
+como
+serverless
+y
+event-driven
+. No solo se presentarán los conceptos, sino que se los llevará a la práctica a través de una aplicación progresiva y técnica.
+Durante toda la clase trabajaremos con el caso de
+FleetSync
+, una empresa de logística que busca migrar sus sistemas locales hacia la nube para mejorar el procesamiento de información, automatizar flujos y escalar su operación. A partir de esta necesidad, abordaremos cada uno de los bloques conceptuales y técnicos, aplicando lo aprendido a decisiones de diseño e implementación que podrían darse en un contexto real.
+¡Éxitos!
+🚀
+
+  Objetivos de la lección
+
+  Analizar el
+almacenamiento
+y
+bases de datos en la nube
+, diferenciando sus características y beneficios en la gestión de datos distribuidos.
+  Comparar
+entornos managed
+y
+unmanaged
+, evaluando sus ventajas y desafíos en términos de administración, escalabilidad y control sobre la infraestructura.
+  Explorar
+arquitecturas serverless y basadas en eventos
+, examinando su aplicación en sistemas modernos para mejorar eficiencia y reducción de costos operativos.
+
+  Caso integrador de la clase
+
+  FleetSync: Gestión logística en la nube
+  Es una empresa de logística urbana con presencia en distintas regiones del país. Su modelo de negocio se basa en ofrecer servicios de entrega para empresas de e-commerce, alimentación y retail, con foco en la trazabilidad y eficiencia del proceso. Actualmente, su operación se apoya en una aplicación web que permite a los usuarios cargar pedidos y realizar seguimientos en tiempo real, mientras los repartidores utilizan una app móvil para registrar entregas y reportar incidentes. Sin embargo, toda su arquitectura tecnológica se encuentra montada sobre servidores locales, con almacenamiento físico limitado, bases de datos relacionales autogestionadas y mecanismos manuales para el procesamiento y análisis de logs. Este enfoque les ha funcionado durante los primeros años de crecimiento, pero la falta de elasticidad, los cuellos de botella en el procesamiento y el alto costo de mantenimiento han empezado a convertirse en una amenaza para la escalabilidad del negocio.
+A raíz de estos desafíos, la dirección tecnológica de FleetSync decide iniciar una
+migración progresiva hacia una arquitectura basada en servicios en la nube.
+El
+objetivo
+es rediseñar los principales componentes del sistema para ganar flexibilidad, reducir costos operativos, habilitar el procesamiento en tiempo real de los datos generados por la flota, y automatizar tareas clave como el registro de entregas y la generación de reportes.
+El
+equipo de desarrollo
+tiene experiencia previa con algunos servicios de AWS, como S3 y Lambda, pero nunca ha trabajado con Google Cloud ni Azure. Tampoco han explorado enfoques arquitectónicos como serverless ni han implementado flujos orientados a eventos.
+
+  Rol del estudiante
+  Ocuparás tu rol en el equipo técnico de FleetSync para acompañar esta transformación.
+A lo largo de cada bloque temático, se tomarán decisiones técnicas concretas que afectarán directamente a la arquitectura final del sistema.
+Partiremos desde los fundamentos de la computación en la nube y la comparación de proveedores, para luego rediseñar el almacenamiento distribuido de documentos, imágenes y logs.
+Evaluaremos también distintas opciones de bases de datos, tanto relacionales como NoSQL, según el tipo de información y los requerimientos de disponibilidad y consistencia. Más adelante, se analizarán escenarios de uso en los que conviene optar por servicios gestionados frente a entornos autoadministrados, y se desarrollará una función Lambda para automatizar el procesamiento de entregas nuevas.
+Finalmente, se implementará un flujo orientado a eventos para recibir, interpretar y enrutar mensajes provenientes de los dispositivos móviles de los repartidores, permitiendo así reaccionar en tiempo real ante entregas fallidas, retrasos o problemas en ruta.
+El
+resultado
+de este recorrido será una arquitectura técnica moderna, distribuida y basada en servicios cloud, que podrá escalar junto con el negocio y responder a las nuevas exigencias operativas de FleetSync. El caso funcionará como hilo conductor de la clase, integrando todos los temas en una narrativa técnica coherente y aplicable al mundo real.
+
+  Database
+En el drive encontrarás los archivos necesarios para las prácticas del Caso de uso.
+  drive
+  [enlace] https://drive.google.com/drive/folders/1g05HMTwIZYmiRxMNngm2_d71JwNtCHhD?usp=drive_link
+
+  SIGUIENTE
+
+================================================================================
+Desarollo [section]
+================================================================================
+Fundamentos de la computación en la nube [blocks]
+================================================================================
+  Virtualización, elasticidad y escalabilidad
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  👩🏽‍💻Virtualización
+  Es el principio que permite a la computación en la nube
+abstraer los recursos físicos de una infraestructura tecnológica.
+Mediante hipervisores o contenedores, un mismo servidor físico puede alojar múltiples entornos virtuales independientes, cada uno con su propio sistema operativo, red y almacenamiento. Esta capacidad
+transforma la infraestructura tradicional en una plataforma flexible
+, donde los recursos pueden asignarse dinámicamente según las necesidades del sistema. Gracias a la virtualización, los servicios cloud pueden garantizar aislamiento, disponibilidad y eficiencia en el uso del hardware, logrando un modelo de infraestructura más ágil y económico que el on-premise.
+  🔁Elasticidad
+  Amplía este concepto al
+permitir que los recursos virtualizados se ajusten automáticamente ante variaciones en la demanda.
+Un sistema elástico puede incrementar la cantidad de instancias o la capacidad de cómputo cuando la carga aumenta, y reducirla cuando disminuye. Esta propiedad no solo optimiza el rendimiento, sino también los costos operativos, ya que evita el sobredimensionamiento típico de los entornos tradicionales.
+En la nube, la elasticidad se configura a través de políticas automáticas de escalado, supervisadas por métricas en tiempo real como el uso de CPU, la latencia de red o el número de solicitudes concurrentes.
+  📶Escalabilidad
+  Define la capacidad estructural de un sistema de manejar un crecimiento sostenido en el tiempo sin degradar su desempeño.
+Puede lograrse de manera horizontal —añadiendo nuevas instancias o nodos— o vertical —incrementando la capacidad de las instancias existentes—. Este principio permite diseñar sistemas resilientes que acompañan la evolución de la demanda sin necesidad de rediseños profundos o interrupciones del servicio. En la nube, la escalabilidad es un atributo planificado, que forma parte del diseño arquitectónico y se ajusta con facilidad gracias a la infraestructura virtualizada subyacente.
+
+  En conjunto, estos tres conceptos —virtualización, elasticidad y escalabilidad— representan el
+núcleo de la arquitectura cloud moderna.
+La
+virtualización
+habilita la abstracción del hardware, la
+elasticidad
+automatiza la adaptación dinámica y la
+escalabilidad
+asegura la sustentabilidad del crecimiento. Su integración permite construir sistemas distribuidos, resilientes y eficientes, donde la infraestructura deja de ser un límite y se convierte en un servicio ajustable al ritmo del negocio.
+
+  🧩En nuestro caso integrador
+  En el caso de
+FleetSync
+, la adopción de estos principios redefine completamente la gestión de su infraestructura. El equipo técnico implementa
+entornos virtualizados
+que permiten replicar servidores para cada región de operación, con políticas de escalado automático configuradas en función de la cantidad de entregas activas. Así, durante horarios pico, el sistema incrementa los recursos disponibles para atender mayor tráfico y, una vez estabilizada la operación, los reduce automáticamente. Este comportamiento elástico garantiza una arquitectura optimizada y adaptable, alineada con las necesidades reales de la empresa.
+
+  Actividad práctica
+
+  Selecciona la respuesta correspondiente.
+
+  ¿Cuál de los siguientes conceptos permite que los recursos en la nube se ajusten automáticamente en función de la carga de trabajo?
+    Virtualización
+    Escalabilidad
+    Elasticidad
+    Seguridad en la red
+
+  Modelos de servicio (IaaS, PaaS, SaaS)
+
+  Los modelos de servicio en la nube definen el nivel de abstracción y control que un usuario tiene sobre los recursos tecnológicos.
+
+  ➡️ Service (IaaS)
+  El modelo
+Infrastructure as a Service (IaaS)
+ofrece acceso a infraestructura virtualizada: servidores, redes y almacenamiento gestionados por el proveedor. Este modelo es ideal para equipos que necesitan flexibilidad total en la configuración de sus entornos, ya que permite instalar y administrar el sistema operativo, las dependencias y las aplicaciones. Sin embargo, también implica mayor responsabilidad en la administración, actualizaciones y seguridad del entorno.
+  ➡️Platform as a Service (PaaS)
+  Platform as a Service (PaaS)
+eleva el nivel de abstracción, proporcionando un entorno de ejecución completamente gestionado para el desarrollo y despliegue de aplicaciones. Los desarrolladores pueden concentrarse en el código y la lógica del negocio, mientras que el proveedor se encarga de la administración del sistema operativo, el escalado, la disponibilidad y el mantenimiento. Este modelo promueve la agilidad y reduce el tiempo de despliegue, aunque limita ciertas configuraciones avanzadas del entorno. Ejemplos comunes incluyen AWS Elastic Beanstalk, Google App Engine o Azure App Service.
+  ➡️Software as a Service (SaaS)
+  Software as a Service (SaaS)
+representa el nivel más alto de abstracción, donde las aplicaciones están completamente gestionadas por el proveedor y el usuario solo consume el servicio a través de una interfaz, generalmente web. Este modelo elimina la necesidad de instalación, mantenimiento o gestión de servidores, y suele aplicarse a herramientas de productividad, colaboración o análisis. SaaS es el modelo dominante en el consumo masivo de servicios cloud y en la adopción de soluciones empresariales de bajo costo operativo.
+
+  Estos tres modelos no son excluyentes, sino
+complementarios dentro de una misma estrategia cloud.
+Un proyecto puede utilizar
+IaaS
+para hospedar sus servidores principales,
+PaaS
+para sus servicios de desarrollo y
+SaaS
+para sus herramientas de monitoreo o comunicación.
+
+  La
+elección
+depende de los objetivos técnicos, los recursos humanos disponibles y el nivel de control que se desee mantener sobre la infraestructura.
+
+  En el caso de
+FleetSync
+, la transición a la nube se diseña combinando distintos modelos de servicio. La empresa utiliza IaaS para desplegar sus entornos de prueba y producción en instancias virtualizadas, PaaS para el desarrollo y despliegue automatizado de microservicios logísticos, y SaaS para implementar herramientas de análisis de rendimiento y comunicación interna. Esta combinación permite que cada componente del sistema aproveche el modelo de servicio más eficiente para su propósito, garantizando control técnico donde es necesario y delegando gestión en los servicios donde no agrega valor estratégico.
+
+  Estos 3 tipos de modelos se pueden resumir así:
+
+  Gestionado por usuario
+  • Aplicaciones
+• Runtime/Framework
+• Sistema Operativo
+• Middleware
+• Datos
+  Gestionado por Proveedor:
+  • Virtualización
+• Servidores
+• Almacenamiento
+• Redes
+• Centros de datos
+  Gestionado por Usuario:
+  • Aplicaciones
+• Datos
+  Gestionado por proveedor
+  •Runtime/Framework
+- Middleware
+• Sistema Operativo
+• Virtualización
+• Servidores
+• Almacenamiento
+• Escalado automático
+• Disponibilidad
+• Mantenimiento
+• Redes
+• Centros de datos
+  Completamente Gestionado
+  • Aplicaciones
+• Datos
+• Runtime/Framework
+• Middleware
+• Sistema Operativo
+• Virtualización
+• Servidores
+• Redes
+• Centros de datos
+• Mantenimiento
+• Actualizaciones
+• Seguridad
+• Escalado
+• Almacenamiento
+  Entornos de Prueba y Producción
+  • Instancias virtualizadas para control total
+• Configuración personalizada de servidores
+• Gestión manual de infraestructura crítica
+  Microservicios Logísticos
+  • Desarrollo y despliegue automatizado
+• Escalado automático de servicios
+• Focus en lógica de negocio
+  Análisis y Comunicación
+  • Herramientas de análisis de rendimiento
+• Comunicación interna gestionada
+• Sin gestión de infraestructura
+
+  Principales proveedores: AWS, Google Cloud, Azure
+
+  El ecosistema de la computación en la nube está dominado por tres grandes proveedores:
+Amazon Web Services (AWS), Google Cloud Platform (GCP) y Microsoft Azure.
+Aunque todos ofrecen servicios equivalentes en infraestructura, almacenamiento, cómputo, redes y bases de datos, cada uno presenta ventajas particulares y enfoques diferenciados.
+
+  🟠AWS
+  Es reconocido por su madurez y amplitud de servicios, con una oferta sólida para infraestructura y automatización. Su ecosistema abarca desde servicios básicos como EC2 y S3 hasta soluciones avanzadas de inteligencia artificial, analítica y machine learning. Su principal fortaleza radica en la escalabilidad y la integración entre componentes.
+  🟢Google Cloud
+  Se distingue por su enfoque en datos, analítica e inteligencia artificial. Su arquitectura está optimizada para el procesamiento masivo y el análisis de información en tiempo real, con herramientas como BigQuery, Dataflow y Pub/Sub. Además, su integración nativa con entornos de desarrollo como Kubernetes y TensorFlow la convierte en una opción atractiva para proyectos basados en ciencia de datos, aprendizaje automático o aplicaciones que requieren alto rendimiento en procesamiento distribuido. Su modelo de precios transparente y su interoperabilidad con entornos híbridos refuerzan su atractivo para equipos multidisciplinarios.
+  🔵Microsoft Azure
+  Destaca por su integración con entornos empresariales y sistemas heredados. Es una plataforma especialmente valorada por organizaciones que ya utilizan infraestructura Windows Server, Active Directory o herramientas de productividad de Microsoft. Azure ofrece un entorno híbrido robusto, con servicios como Azure Functions, Azure SQL Database y Azure DevOps, orientados a empresas que buscan migraciones progresivas sin abandonar su ecosistema tradicional. Su soporte a entornos híbridos y su orientación corporativa la posicionan como la opción preferida para proyectos de transformación digital en grandes organizaciones.
+
+  Aunque las tres plataformas ofrecen un conjunto de servicios similares, la elección entre ellas depende del perfil técnico del equipo, el tipo de aplicación y las prioridades de integración.
+Los entornos multicloud —que combinan servicios de distintos proveedores— son cada vez más comunes
+, ya que permiten aprovechar las fortalezas de cada plataforma y reducir la dependencia de un único proveedor.
+
+  🧩En el caso de
+FleetSync
+, la experiencia previa del equipo con AWS facilita el inicio de la migración utilizando esta plataforma. Sin embargo, el proyecto piloto incorpora pruebas en Google Cloud y Azure para evaluar sus capacidades en almacenamiento distribuido, manejo de eventos y procesamiento en tiempo real. A partir de estas comparaciones, el equipo plantea una estrategia multicloud, donde AWS se utiliza para infraestructura principal, GCP para analítica y eventos, y Azure para integración con herramientas de gestión interna. Esta decisión refuerza la flexibilidad técnica del sistema y prepara a la empresa para futuras expansiones o integraciones.
+
+  SIGUIENTE
+
+================================================================================
+Almacenamiento en la nube y bases de datos distribuidas [blocks]
+================================================================================
+  Comparativa entre AWS S3, Google Cloud Storage y Azure Blob Storage
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  🤖
+COmpletar desde aca!
+  El almacenamiento de objetos en la nube se ha convertido en una solución estándar para alojar archivos no estructurados como documentos, imágenes, logs, backups y registros multimedia. Los tres principales proveedores ofrecen servicios equivalentes en este sentido:
+Amazon S3, Google Cloud Storage (GCS) y Azure Blob Storage.
+Cada uno permite almacenar grandes volúmenes de datos en buckets o contenedores, con acceso a través de APIs REST, SDKs y consolas gráficas, y con opciones para gestión de versiones, control de acceso, replicación y políticas de retención.
+
+  ➡️Amazon S3
+  Es reconocido por su robustez, disponibilidad y ecosistema maduro. Su modelo de almacenamiento basado en clases (Standard, Intelligent-Tiering, Glacier) permite optimizar costos en función del ciclo de vida de los datos. Dispone de una amplia gama de integraciones con otros servicios de AWS y soporta múltiples regiones y zonas de disponibilidad.
+  ➡️Google Cloud Storage
+  Ofrece una arquitectura similar, pero se destaca por su integración nativa con BigQuery y herramientas de análisis de datos, lo que facilita el procesamiento directo sobre grandes volúmenes sin necesidad de copiar archivos. Su política de precios simplificada también resulta atractiva para cargas predecibles y sistemas de streaming.
+  ➡️Azure Blob Storage,
+  Se alinea fuertemente con entornos empresariales. Su compatibilidad con herramientas de Microsoft y su enfoque en integraciones híbridas la convierten en una opción estable para proyectos que requieren interoperabilidad con sistemas locales. Al igual que S3 y GCS, permite controlar accesos mediante políticas, generar enlaces temporales, replicar información entre regiones y automatizar flujos con eventos. Aunque sus capacidades básicas son similares, cada servicio tiene particularidades en cuanto a sintaxis, configuración de autenticación y herramientas de monitoreo.
+
+  Comparar estos servicios implica analizar no solo el costo por GB almacenado, sino también la frecuencia de acceso, el volumen de operaciones, la latencia requerida y las dependencias con otros componentes de la arquitectura. Elegir uno u otro no suele definirse por capacidad técnica pura, sino por afinidad con el stack general, el conocimiento del equipo y la visión a largo plazo del sistema.
+
+  🧩 En nuestro caso de uso
+  En el caso de
+FleetSync
+, el equipo técnico inicia el rediseño de su sistema de almacenamiento utilizando Amazon S3, dada su experiencia previa. Se crea un bucket para guardar los eventos de entrega en formato JSON, junto con documentos como comprobantes de firma o imágenes de paquetes. A modo de evaluación comparativa, se replica esta configuración en Google Cloud Storage y Azure Blob Storage, analizando diferencias en el tiempo de subida, acceso y configuración. Esta prueba permite identificar que, aunque funcionalmente equivalentes, la elección de proveedor incide en la curva de aprendizaje, el flujo de desarrollo y la integración futura con otros servicios cloud.
+
+  Para cerrar este bloque, resulta útil visualizar de manera estructurada las diferencias y similitudes entre los principales servicios de almacenamiento de objetos ofrecidos por los proveedores líderes del mercado.
+Si bien todos cumplen con los requisitos básicos de durabilidad, escalabilidad y acceso programático, sus características particulares en cuanto a clases de almacenamiento, integración con el ecosistema, gestión de accesos y modelos de precios pueden influir significativamente en las decisiones de arquitectura.
+
+  El siguiente cuadro resume los
+aspectos más relevantes de Amazon S3, Google Cloud Storage y Azure Blob Storage,
+facilitando una evaluación comparativa en función de las necesidades específicas de cada proyecto:
+
+  Característica
+AWS S3
+Google Cloud Storage (GCS)
+Azure Blob Storage
+Modelo de almacenamiento
+Basado en buckets y objetos
+Basado en buckets y objetos
+Basado en contenedores y blobs
+Clases de almacenamiento
+Standard, Intelligent-Tiering, Glacier, Deep Archive
+Standard, Nearline, Coldline, Archive
+Hot, Cool, Archive
+Durabilidad
+99.999999999% (11 nueves)
+99.999999999%
+99.999999999%
+Alta disponibilidad regional
+Multi-AZ por defecto
+Regional y multirregional disponibles
+Redundancia local, zonal y geográfica
+Gestión de versiones
+Sí (versioning habilitable por bucket)
+Sí
+Sí
+Control de acceso
+IAM policies, bucket policies, ACLs
+IAM, ACLs, Signed URLs
+Azure AD, SAS tokens, RBAC
+Integración con ecosistema
+Alta (Lambda, S3 events, Athena, Glue...)
+Alta (BigQuery, Dataflow, Pub/Sub...)
+Alta (Logic Apps, Event Grid, Synapse...)
+Triggers / Eventos
+S3 Event Notifications
+Event Notifications + Cloud Functions
+Event Grid / Azure Functions
+Gestión desde CLI y SDK
+AWS CLI, SDKs en múltiples lenguajes
+gcloud CLI, SDKs variados
+Azure CLI, SDKs disponibles
+Precios (consulta aproximada)
+Por GB/mes + operaciones + salida
+Por GB/mes + operaciones + salida
+Por GB/mes + transacciones + salida
+Casos de uso frecuentes
+Hosting web, backups, logs, big data
+Machine learning, streaming, backups
+Integración empresarial, devops, archivos
+
+  Actividad práctica
+
+  Responde verdadero o falso según corresponda:
+
+  Amazon S3, Google Cloud Storage y Azure Blob Storage proporcionan servicios equivalentes de almacenamiento de objetos, pero cada uno se integra de forma diferente con su ecosistema de servicios en la nube.
+    Verdadero
+    Falso
+
+  Tipos de almacenamiento (objetos, bloques, archivos)
+
+  Los
+servicios de almacenamiento en la nube
+se organizan en
+tres tipos principales: almacenamiento de objetos, de bloques y de archivos.
+Cada uno responde a necesidades distintas en términos de estructura, acceso, rendimiento y compatibilidad con aplicaciones. Comprender las diferencias entre estos enfoques es clave para seleccionar la opción más adecuada para cada componente del sistema.
+
+  📦 Almacenamiento de objetos
+  El almacenamiento de objetos
+es el más utilizado en la nube pública.
+Se basa en la
+organización de archivos como objetos independientes
+, acompañados de metadatos y un identificador único. Es ideal para alojar archivos estáticos, imágenes, documentos, backups y logs.
+Los objetos no se organizan jerárquicamente como en un sistema de archivos tradicional, y no pueden ser modificados parcialmente.
+Su
+fortaleza
+radica en la escalabilidad, la durabilidad y el acceso distribuido mediante APIs, lo que lo convierte en la opción preferida para aplicaciones modernas que interactúan con recursos externos o móviles.
+  🔲 Almacenamiento en bloques
+  El almacenamiento en bloques
+divide los datos en unidades fijas (bloques)
+, cada una identificada por una dirección específica.
+Este modelo es común en discos virtuales, bases de datos de alto rendimiento y sistemas operativos que requieren control fino sobre la escritura y lectura de datos. Permite operaciones de baja latencia y acceso aleatorio, lo que lo hace óptimo para cargas críticas como bases de datos transaccionales o volúmenes adjuntos a máquinas virtuales.
+En la nube, los servicios de almacenamiento en bloques
+permiten adjuntar volúmenes a instancias
+(como Amazon EBS, Google Persistent Disk o Azure Disk Storage)
+y administrar snapshots, redimensionamiento y backup.
+  📁 Almacenamiento de archivos
+  El almacenamiento de archivos, en cambio,
+emula una estructura jerárquica clásica con carpetas y rutas, similar al sistema de archivos de un sistema operativo.
+Es utilizado en entornos donde múltiples usuarios o aplicaciones acceden y comparten archivos, como servidores de contenido o entornos de colaboración.
+En la nube, este modelo
+se implementa
+a través de servicios como Amazon EFS, Google Filestore o Azure Files, que permiten montar sistemas compartidos y escalables sin necesidad de hardware local.
+
+  La elección del tipo de almacenamiento depende de la naturaleza de los datos, la forma en que se accede a ellos y los requisitos de rendimiento.
+En arquitecturas modernas, es común combinar distintos tipos en una misma solución, aprovechando las fortalezas de cada uno según el caso de uso.
+🧩 FleetSync
+implementa almacenamiento de objetos para guardar los eventos de entrega en S3, lo que le permite acceder rápidamente desde distintos servicios sin mantener servidores activos. Para almacenar bases de datos y logs críticos, se utilizan volúmenes de almacenamiento en bloques conectados a instancias específicas. El almacenamiento de archivos queda reservado para entornos de prueba compartidos, donde distintos miembros del equipo acceden a documentación y recursos técnicos. Esta combinación garantiza un diseño eficiente, modular y optimizado para cada tipo de dato.
+
+  Tipo de almacenamiento
+Estructura
+Ejemplo de uso
+Ventajas principales
+Servicios en la nube
+Objetos
+Objetos con metadatos y ID único
+Imágenes, backups, logs
+Escalabilidad, durabilidad
+Amazon S3, Google Cloud Storage
+Bloques
+Bloques con dirección fija
+Bases de datos, volúmenes VM
+Bajo retardo, control fino
+Amazon EBS, Azure Disk
+Archivos
+Jerárquico (carpetas/rutas)
+Servidores compartidos
+Compatibilidad, colaboración
+Amazon EFS, Google Filestore
+
+  Bases de datos en la nube: relacionales vs NoSQL
+
+  El almacenamiento estructurado en la nube se organiza principalmente en dos enfoques:
+bases de datos relacionales y bases de datos NoSQL.
+
+  ➡️Bases relacionales
+  Utilizan un modelo tabular con esquemas predefinidos, relaciones normalizadas y un lenguaje estructurado de consultas (SQL).
+Son ideales para sistemas donde la integridad referencial, las transacciones y la consistencia fuerte son requisitos centrales.
+Ejemplos
+comunes en la nube incluyen Amazon RDS, Cloud SQL y Azure SQL Database.
+  ➡️Bases NoSQL
+  Adoptan modelos más flexibles
+como documentos, pares clave-valor, grafos o columnas anchas. Están diseñadas para ofrecer alta disponibilidad, escalabilidad horizontal y tolerancia a estructuras cambiantes.
+Son particularmente
+útiles
+en contextos de procesamiento en tiempo real, flujos de eventos, aplicaciones móviles o sistemas que deben gestionar grandes volúmenes de datos semiestructurados.
+Algunas de las
+opciones más populares
+en este segmento son Amazon DynamoDB, Google Firestore y Azure Cosmos DB.
+
+  En la nube,
+ambos modelos pueden coexistir y combinarse dentro de una misma solución.
+Las bases relacionales suelen utilizarse para almacenar la lógica central del negocio, mientras que las NoSQL gestionan eventos, registros de actividad, preferencias de usuario o datos temporales. Los servicios gestionados permiten delegar tareas operativas como backup, escalado o mantenimiento, lo que libera al equipo técnico para enfocarse en la lógica de aplicación.
+La elección entre relacional y NoSQL no se reduce a una preferencia técnica, sino que depende del tipo de información, la velocidad requerida, el nivel de estructuración de los datos y la frecuencia de cambio del esquema. En general, los
+sistemas híbridos
+permiten mayor flexibilidad y rendimiento, siempre que se mantenga la coherencia entre los distintos modelos y servicios.
+
+  🧩En nuestro caso de uso
+  FleetSync
+diseña su arquitectura de datos con este enfoque mixto. Utiliza una base relacional PostgreSQL para almacenar entregas, vehículos y usuarios, asegurando integridad y trazabilidad. En paralelo, implementa una base NoSQL basada en Firestore para almacenar eventos en tiempo real y logs de actividad, permitiendo lecturas rápidas y tolerancia a cambios en la estructura. Esta separación le permite escalar ambos sistemas según su naturaleza y frecuencia de acceso, garantizando eficiencia operativa y flexibilidad de crecimiento.
+
+  En resumen:
+
+  CARACTERÍSTICAS:
+  • Esquemas predefinidos
+• SQL estandarizado
+• Integridad referencial
+• Transacciones ACID
+• Consistencia fuerte
+• Relaciones normalizadas
+• Consultas complejas (JOINs)
+• Modelo maduro y confiable
+• Escalabilidad vertical
+• Amplio ecosistema
+  CARACTERÍSTICAS:
+  • Esquemas flexibles
+• Escalabilidad horizontal
+• Alta disponibilidad
+• Eventual consistency
+• Tolerancia a particiones
+• Modelos: Documentos, K-V, Grafos
+• Rendimiento en tiempo real
+• Datos semiestructurados
+• Cambios frecuentes
+• Manejo de Big Data
+  ALMACENA:
+  • Entregas (origen, destino, estado)
+• Vehículos (placa, modelo, conductor)
+• Usuarios (empleados, clientes)
+• Integridad + Transaccionalidad + Consistencia
+  ALMACENA:
+  • Eventos en tiempo real (GPS, ubicación)
+• Log de actividad (cambios de estado)
+• Preferencias de usuario (config)
+• Velocidad + Flexibilidad + Escalabilidad
+
+  SIGUIENTE
+
+================================================================================
+Entornos Managed vs Unmanaged [blocks]
+================================================================================
+  Definición y diferencias clave
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  🤖
+COmpletar desde aca!
+  En la computación en la nube, el concepto de “managed vs unmanaged” hace referencia al grado de responsabilidad que asume el proveedor respecto de los servicios que se utilizan.
+
+  🤖Entorno managed
+  En un entorno managed,
+el proveedor de la nube se encarga de la gestión de la infraestructura subyacente: aprovisionamiento, escalado, actualizaciones de seguridad, monitoreo y backups.
+Esto le permite al equipo de desarrollo enfocarse en la lógica de negocio y en el despliegue de funcionalidades, sin tener que operar o mantener servidores o middleware.
+  👩🏽‍💻Entorno unmanaged
+  En cambio, un entorno unmanaged implica que
+el equipo conserva el control total sobre la infraestructura.
+Esto incluye no solo la configuración de los recursos, sino también su mantenimiento operativo, actualización de componentes, monitoreo y resolución de fallos.
+Aunque más exigente, este enfoque permite implementar configuraciones personalizadas, optimizar el uso de recursos y responder con mayor precisión a requisitos técnicos o regulatorios.
+
+  La
+diferencia clave
+entre ambos enfoques no está solo en quién realiza la gestión operativa, sino en el nivel de abstracción que se le ofrece al equipo técnico. Mientras que un
+entorno managed
+encapsula la complejidad y automatiza tareas comunes, un
+entorno unmanaged
+expone todos los componentes al control del usuario. Esto afecta no solo a los tiempos de desarrollo, sino también al modelo de costos, a las capacidades de diagnóstico, a la flexibilidad para integrar componentes externos y a la responsabilidad sobre la seguridad del entorno.
+Esta diferencia también influye en la forma en que se diseñan y escalan los sistemas. En
+entornos managed
+: el proveedor ofrece mecanismos de escalado automático y alta disponibilidad por defecto, pero a costa de limitaciones en configuraciones avanzadas. En
+entornos unmanaged
+: escalar requiere planificación manual o integración con otros servicios, pero a cambio se tiene mayor capacidad de tuning. La elección entre ambos enfoques suele depender del tipo de carga de trabajo, la experiencia del equipo y la etapa del proyecto.
+
+  🧩En nuestro caso de uso
+  En el caso de
+FleetSync
+, el equipo analiza estas diferencias a la hora de diseñar la capa de almacenamiento. Para los registros de entregas y eventos logísticos, que requieren alta disponibilidad y acceso inmediato, se opta por una base de datos administrada como Cloud Firestore, lo que permite evitar tareas operativas y escalar automáticamente según la carga. Para el procesamiento de modelos predictivos que ajustan rutas y tiempos de entrega, eligen una instancia autogestionada, ya que necesitan controlar dependencias específicas y ejecutar procesos de alto consumo en horarios programados. Esta combinación les brinda equilibrio entre velocidad operativa y control técnico.
+
+  Casos de uso
+
+  Impacta directamente en cómo se construyen y operan las soluciones en la nube. Un caso claro es el uso de bases de datos.
+En proyectos con necesidades comunes de persistencia, disponibilidad alta y mantenimiento mínimo
+: es habitual optar por una base de datos relacional administrada como Amazon RDS, Cloud SQL o Azure Database for PostgreSQL. Estas plataformas se encargan automáticamente del parcheo de seguridad, los backups automáticos, la configuración de réplicas y el monitoreo de la instancia, permitiendo a los equipos concentrarse en la lógica de negocio.
+  Esto ocurre
+cuando se necesita una versión específica del motor, configuraciones de rendimiento avanzadas, integración con herramientas de seguridad personalizadas o cumplimiento de normativas específicas.
+En estos casos, los equipos prefieren desplegar la base de datos en una máquina virtual o en un contenedor propio, con el objetivo de controlar el ciclo completo del servicio.
+También es común este enfoque en escenarios de I+D donde se prueba comportamiento del sistema ante configuraciones inusuales.
+  Para productos con alta rotación de versiones, tráfico variable y requerimientos de disponibilidad alta, servicios gestionados como Cloud Run, AWS Elastic Beanstalk o Azure App Service ofrecen un entorno ideal para automatizar el despliegue, la escalabilidad y el balanceo de carga.
+Por otro lado, si la aplicación necesita librerías del sistema operativo específicas, acceso al sistema de archivos local o uso de recursos como GPUs, el equipo suele optar por desplegarla en una instancia virtual o en un clúster Kubernetes autogestionado, ganando flexibilidad a cambio de mayor responsabilidad operativa.
+
+  El uso de
+servicios managed
+también puede facilitar el cumplimiento de normativas en sectores como fintech o salud, ya que los proveedores suelen certificar la infraestructura bajo estándares internacionales. No obstante, cuando los requisitos son muy específicos o requieren integración con sistemas legados, se prefiere el despliegue
+unmanaged.
+En estos casos, el costo operativo se justifica por la necesidad de garantizar interoperabilidad o control fino sobre la arquitectura.
+
+  🧩En nuestro caso de uso:
+  En
+FleetSync
+, esta lógica se aplica de forma selectiva. Para la base de datos de usuarios y permisos de acceso, se utiliza una instancia administrada de Cloud SQL, lo que permite integrarse fácilmente con el resto del ecosistema y mantener backups automáticos.
+Para el sistema de optimización de rutas, se desarrolla una API sobre una instancia autogestionada con contenedores Docker, lo que brinda control sobre las dependencias, la ejecución y la disponibilidad de GPU temporal. Esta arquitectura híbrida permite responder con agilidad a las necesidades dinámicas del negocio logístico, sin perder estabilidad ni capacidad de personalización.
+
+  Principales aspectos de cada uno de estos entornos se pueden resumir a continuación:
+
+  Aspecto
+Entorno Managed (Gestionado)
+Entorno Unmanaged (Autogestionado)
+Responsabilidad operativa
+El
+proveedor gestiona
+infraestructura, parches, backups, escalado, monitoreo.
+El equipo gestiona todo:
+configuración, actualizaciones, monitoreo, fallos.
+Nivel de control
+Limitado
+; se trabaja dentro de las capacidades que ofrece el servicio.
+Total
+; se puede modificar cualquier aspecto del entorno.
+Nivel de abstracción
+Alto:
+se ocultan detalles operativos y se automatizan tareas.
+Bajo:
+todos los componentes están expuestos al usuario.
+Flexibilidad de configuración
+Menor,
+configuraciones avanzadas suelen no estar permitidas.
+Alta
+, se permiten configuraciones personalizadas y tuning profundo.
+Escalabilidad
+Automática e integrada
+por defecto.
+Manual o mediante herramientas externas;
+requiere planificación.
+Seguridad
+Gestionada por el proveedor
+(parches, certificados, compliance).
+Totalmente responsabilidad del equipo.
+Puede cumplir requisitos específicos.
+Costo
+Usualmente mayor
+por el valor añadido de la operación automatizada.
+Más económico en infraestructura
+, pero costoso en horas de operación.
+Velocidad de desarrollo
+Alta:
+el equipo se enfoca en lógica de negocio.
+Menor:
+se dedica tiempo a instalación, mantenimiento y operación.
+Casos de uso típicos
+Bases de datos administradas
+(RDS, Cloud SQL), Cloud Run, App Service, Firestore.
+Bases de datos personalizadas
+, máquinas virtuales, contenedores con dependencias especiales, Kubernetes autogestionado.
+Ventajas principales
+Simplicidad, rapidez, disponibilidad, menos riesgo operativo.
+Control total, personalización, cumplimiento específico, optimización fina.
+Desventajas principales
+Menor control, límites técnicos del servicio, dependiente del proveedor.
+Mayor complejidad operativa, necesidad de expertise, riesgo operacional más alto.
+Ideal para
+Equipos que priorizan velocidad, estabilidad y simplicidad.
+Equipos que requieren configuraciones especiales o control completo.
+Ejemplos en FleetSync
+Firestore para registros logísticos; Cloud SQL para usuarios/permisos.
+Instancia autogestionada para modelos de optimización; API con Docker y GPU.
+
+  SIGUIENTE
+
+================================================================================
+Arquitecturas serverless [blocks]
+================================================================================
+  Concepto y fundamentos del cómputo sin servidor
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  🤖
+COmpletar desde aca!
+  El
+modelo serverless
+, o cómputo sin servidor, representa un cambio profundo en la manera de diseñar y desplegar aplicaciones en la nube. A diferencia de los enfoques tradicionales, donde el equipo técnico debe encargarse de aprovisionar, configurar y mantener servidores —virtuales o físicos—, en el modelo serverless
+el proveedor se ocupa por completo de la infraestructura subyacente.
+El
+equipo de desarrollo
+escribe funciones individuales que se ejecutan únicamente cuando son invocadas, y el resto del tiempo no consumen recursos ni generan costos. Este paradigma elimina muchas de las responsabilidades operativas asociadas al escalado, la disponibilidad y la administración del entorno.
+Uno de los
+pilares
+del cómputo sin servidor es su
+orientación a eventos
+. Las funciones se disparan como respuesta a eventos definidos: una petición HTTP, una carga de archivo, un mensaje en una cola, un cambio en una base de datos, entre otros. Esta arquitectura reactiva permite construir flujos desacoplados y modulares, donde cada función cumple una única responsabilidad y se comunica con el resto del sistema a través de interfaces bien definidas. Esta lógica facilita el mantenimiento, mejora la trazabilidad de errores y permite escalar de forma granular según la carga de trabajo real.
+Otro
+aspecto clave
+del modelo es su
+escalabilidad automática.
+Las funciones pueden ejecutarse simultáneamente en cientos o miles de instancias sin necesidad de configuración adicional. Esta capacidad es ideal para sistemas con carga intermitente o impredecible, ya que evita tanto el sobredimensionamiento como la saturación. Además, al pagar únicamente por el tiempo de ejecución efectivo —medido en milisegundos—, el modelo serverless se alinea con estrategias de optimización de costos en entornos productivos.
+Desde el punto de vista del desarrollo,
+el enfoque sin servidor promueve una arquitectura basada en componentes pequeños y autónomos, en lugar de aplicaciones monolíticas.
+
+  Exige repensar la lógica de negocio
+en unidades funcionales independientes, orientadas a tareas específicas.
+  Requiere nuevas prácticas de testing, monitoreo y despliegue
+, ya que el control sobre la infraestructura es mínimo.
+  La
+observabilidad
+, el
+manejo de logs distribuidos
+y la
+gestión de errores
+cobran especial relevancia en estos entornos.
+
+  🧩En nuestro caso de uso
+  En el caso de FleetSync, el equipo implementa una función sin servidor que se activa automáticamente cada vez que un repartidor completa una entrega. Esta función, desarrollada inicialmente como AWS Lambda, recibe un evento en formato JSON, valida los datos, los almacena en la base de datos y genera un registro de actividad.
+El sistema no necesita mantener servidores encendidos ni gestionar procesos de escucha: la función permanece inactiva hasta que ocurre el evento, y luego se ejecuta en menos de un segundo. Esta eficiencia no solo mejora el rendimiento del sistema, sino que reduce significativamente los costos operativos y simplifica el mantenimiento.
+
+  Ventajas y desventajas
+
+  ✅Ventajas del modelo serverless
+  Son claras en contextos donde la eficiencia operativa, la modularidad y la elasticidad son prioritarias.
+Al delegar la gestión de la infraestructura en el proveedor, los equipos pueden enfocarse exclusivamente en la lógica de negocio y en el valor que aporta la aplicación. Esta especialización
+reduce el tiempo de desarrollo, acelera los ciclos de despliegue y permite reaccionar rápidamente ante nuevas necesidades o cambios en la operación.
+La ejecución bajo demanda y la facturación basada en el uso real hacen que el cómputo sin servidor sea particularmente atractivo para startups
+, MVPs o sistemas con carga intermitente.
+Tolerancia a fallos y la alta disponibilidad implícita que ofrecen los proveedores cloud en sus servicios serverless.
+Las funciones se ejecutan en entornos redundantes y distribuidos por defecto, sin necesidad de configurar mecanismos de failover o balanceo de carga. Además, al ser invocadas en contenedores efímeros, cada ejecución es aislada, lo que contribuye a la seguridad y la resiliencia del sistema. Esto permite construir arquitecturas robustas con un esfuerzo mínimo en comparación con enfoques más tradicionales.
+  ❌Limitaciones
+  El tiempo de arranque en frío (cold start), que puede generar una latencia inicial en funciones que no se ejecutan con frecuencia.
+Aunque los proveedores han optimizado significativamente este aspecto, en sistemas de misión crítica puede ser un factor sensible.
+Otra limitación es
+el tiempo máximo de ejecución permitido por las funciones
+(por ejemplo, 15 minutos en AWS Lambda), lo que restringe su uso en procesos de larga duración.
+El debugging y monitoreo en entornos serverless puede ser más complejo
+, especialmente cuando las funciones están encadenadas o distribuidas en diferentes regiones.
+La trazabilidad de errores y la observabilidad del sistema requieren herramientas específicas y un enfoque distinto al de las arquitecturas monolíticas.
+También es importante considerar la
+dependencia con el proveedor:
+al utilizar funciones específicas de una plataforma, se incrementa el lock-in, lo que puede dificultar una migración futura.
+
+  🧩 FleetSync
+evalúa estas ventajas y limitaciones al definir su arquitectura basada en eventos. Si bien aprovecha la eficiencia del modelo serverless para funciones simples y frecuentes —como el registro de entregas—, evita su uso en procesos complejos de análisis de datos o tareas de largo procesamiento, donde otras soluciones gestionadas resultan más adecuadas. Este uso estratégico permite al equipo optimizar recursos sin comprometer la trazabilidad ni la estabilidad del sistema. Además, se incorporan herramientas de monitoreo para seguir la ejecución de funciones en tiempo real y anticipar posibles cuellos de botella.
+
+  SIGUIENTE
+
+================================================================================
+Arquitecturas basadas en eventos [blocks]
+================================================================================
+  Principios de diseño orientados a eventos
+  The difference between Kirsten and Michelle should be noticeable. Kirsten is an accountable team member, and Michelle is not. Think about the unique impact this distinction would have on a remote team. As a remote team manager, you don’t always have the visibility or tools you need to keep tabs on Michelle. It’s much easier for Michelle to ignore a direct message or email from you than it is for her to ignore a knock on her office door. A lack of follow-up and follow-through may breed distrust, and even resentment, between you and Michelle, or Michelle and her other team members.
+
+  🤖
+COmpletar desde aca!
+  Las
+arquitecturas orientadas a eventos
+se basan en la premisa de que los
+sistemas deben reaccionar de forma autónoma, asíncrona y desacoplada a los cambios que ocurren en su entorno.
+Un
+evento
+es una notificación de que “algo pasó” —por ejemplo, se completó una entrega, falló un intento, se actualizó una ubicación— y desencadena uno o más procesos posteriores sin requerir una intervención directa o sincronía con otros servicios. Este enfoque permite
+construir sistemas altamente escalables, modulares y resilientes
+, donde cada componente actúa como un nodo autónomo que responde a estímulos.
+El diseño de este tipo de arquitectura implica definir claramente
+tres roles:
+
+  Emisores de eventos (producers):
+Los productores generan eventos y los envían a un intermediario, que los almacena temporalmente o los enruta según reglas predefinidas.
+  Canales de distribución (brokers, tópicos o colas)
+intermediarios que reciben los eventos generados por los productores y los ponen a disposición de los consumidores. Su función es garantizar que los mensajes se transmitan de forma confiable, ordenada y escalable, ya sea almacenándolos temporalmente, distribuyéndolos a múltiples suscriptores o aplicando reglas de ruteo.
+  Consumidores (services o functions):
+se suscriben a uno o más canales y procesan los eventos a medida que llegan. Este patrón desacopla completamente el origen del evento de su destino, lo que facilita la evolución independiente de cada parte del sistema.
+
+  Uno de los
+beneficios
+centrales de este modelo es su
+capacidad de escalar horizontalmente.
+Al tratar cada evento como una unidad de procesamiento aislada, es posible aumentar la cantidad de consumidores según la carga, distribuir el procesamiento en paralelo y mejorar la tolerancia a fallos. Además,
+permite auditar cada paso del flujo, almacenar eventos históricos y reconstruir el estado de un sistema a partir de su secuencia de eventos.
+Esta característica es clave para plataformas con alta trazabilidad, como sistemas logísticos, financieros o de IoT.
+
+  Existen distintas tecnologías que implementan estos patrones.
+Kafka
+es una de las más utilizadas por su robustez, rendimiento y soporte a procesamiento distribuido en tiempo real.
+Google Pub/Sub y Amazon SQS
+ofrecen servicios equivalentes con una capa de gestión simplificada, orientados a integraciones nativas con sus respectivas plataformas.
+Cada una presenta ventajas según el volumen de datos, el modelo de despliegue y la experiencia previa del equipo. En este contexto, resulta natural optar por Kafka si ya se cuenta con familiaridad técnica, aunque siempre es conveniente evaluar el ecosistema completo.
+
+  🧩En nuestro caso de uso
+  En
+FleetSync
+, el equipo diseña una arquitectura orientada a eventos utilizando Kafka como canal de comunicación principal. Los dispositivos móviles de los vehículos emiten eventos al completar una entrega, fallar en un intento o registrar una posición GPS. Estos eventos se publican en distintos tópicos —como entregas, fallos y ubicaciones— y son procesados por consumidores especializados que actualizan la base de datos, disparan funciones Lambda o generan alertas internas.
+Esta arquitectura desacoplada permite escalar cada parte del sistema por separado, mantener un flujo constante de datos en tiempo real y mejorar la capacidad de reacción ante cualquier situación operativa.
+
+  A modo de ejemplo, el siguiente diagrama de flujo muestra visualmente el recorrido de eventos en el caso de FleetSync:
+
+  Colas, tópicos y mensajes
+
+  Los
+sistemas basados en eventos
+requieren una infraestructura de mensajería intermedia que permita recibir, almacenar, enrutar y entregar mensajes entre productores y consumidores. Esta infraestructura se basa en
+dos modelos principales: colas y tópicos.
+
+  ➡️COLAS
+  Las
+colas
+funcionan con un enfoque punto a punto: cada mensaje es consumido por un solo receptor, ideal para tareas en serie como procesamiento de órdenes o ejecución de trabajos pendientes.
+  ➡️TÓPICOS
+  Los
+tópicos,
+en cambio, siguen un patrón de publicación/suscripción, donde un mismo mensaje puede ser recibido por múltiples suscriptores, lo que los hace ideales para flujos paralelos, auditorías o sistemas de notificación.
+
+  En términos técnicos, un
+mensaje
+representa una unidad de información que describe un evento. Puede estar estructurado como JSON, XML o cualquier formato serializable, y debe incluir toda la información necesaria para ser procesado de forma autónoma.
+La estandarización del formato de mensajes es fundamental para garantizar la interoperabilidad entre servicios y evitar
+dependencias rígidas en el sistema. Además, cada mensaje puede ir acompañado de metadatos como timestamps, IDs de correlación o prioridades, que permiten enriquecer el procesamiento y habilitar mecanismos de seguimiento.
+Kafka
+implementa una estructura basada en tópicos particionados, donde cada productor publica mensajes en un tópico determinado, y múltiples consumidores se distribuyen el procesamiento a través de particiones. Esto permite manejar grandes volúmenes de datos de forma paralela y resiliente. Por su parte, Google Pub/Sub y Amazon SQS ofrecen una experiencia gestionada que reduce la complejidad operativa, pero con menos control sobre el enrutamiento y la retención. La elección entre estas tecnologías depende del balance entre control, escalabilidad, simplicidad y costo de mantenimiento.
+
+  📌La
+correcta gestión de colas y tópicos
+es clave para evitar cuellos de botella, pérdidas de mensajes o duplicaciones. Es importante configurar correctamente los tiempos de retención, las políticas de reintento y los mecanismos de confirmación (acknowledgment) según el nivel de criticidad del mensaje.
+Asimismo,
+los flujos deben diseñarse para tolerar errores:
+un fallo en un consumidor no debería afectar al resto del sistema, y los mensajes deben poder reintentarse o reenviarse sin comprometer la integridad de los datos.
+
+  🧩En nuestro caso de uso
+  En
+FleetSync,
+los mensajes generados por los vehículos se publican en tiempo real en distintos tópicos de Kafka, según el tipo de evento.
+Por ejemplo, al completar una entrega, se genera un mensaje JSON que se envía al tópico
+entregas
+. Este mensaje es procesado por un consumidor que valida los datos y activa la función Lambda correspondiente. Si se produce un fallo de entrega, otro mensaje se envía al tópico
+fallos
+, donde un servicio distinto genera alertas para el equipo de soporte. Además, los tópicos
+ubicaciones
+registran la posición GPS de los vehículos cada 30 segundos, alimentando un panel de visualización en vivo.
+Esta estructura permite operar con datos en tiempo real, desacoplar responsabilidades y mantener una arquitectura flexible, robusta y evolutiva.
+
+  Las diferencias, ventajas y desventajas de las arquitecturas serverless y basada en eventos se puede visualizar de la siguiente forma:
+
+  Modelo Tradicional
+  • Aprovisionar servidores manualmente
+• Configurar infraestructura
+• Gestionar escalabilidad
+• Pagar por tiempo activo total
+• Overhead operativo alto
+  Modelo Serverless
+  • Proveedor gestiona infraestructura
+• Funciones por eventos
+• Escalabilidad automática
+• Pago por ejecución
+• Enfoque en lógica de negocio
+  Ventajas
+  • Escalabilidad automática
+• Pago por uso real
+• Alta disponibilidad
+• Desarrollo modular
+- Ideal para MVPs
+  Limitaciones
+  • Cold start latency
+• Tiempo limitado (15 min)
+• Debugging complejo
+• Vendor lock-in
+• No para tareas complejas
+Evitar procesos largos
+
+  SIGUIENTE
+
+================================================================================
+Cierre [section]
+================================================================================
+Cierre [blocks]
+================================================================================
+  ¡Vamos a recapitular lo aprendido!
+  ¡Vamos a recapitular todo lo que hemos aprendido!
+
+  Comprender los fundamentos de la
+computación en la nube y su aplicación en entornos reales
+implica mucho más que incorporar tecnologías nuevas: exige
+adoptar un enfoque arquitectónico distinto, orientado a la escalabilidad, el desacoplamiento y la automatización.
+Esta clase propuso un recorrido progresivo para integrar esos conceptos dentro de un caso técnico completo, atravesando las principales decisiones que enfrenta cualquier equipo al diseñar sistemas distribuidos y resilientes. A continuación, se sintetizan algunos ejes conceptuales clave que permiten consolidar lo aprendido.
+La virtualización, la elasticidad y la escalabilidad no son conceptos aislados,
+sino los pilares que permiten que la infraestructura se comporte como un recurso dinámico, adaptable y alineado con los ritmos del negocio. Estos principios deben pensarse desde el diseño inicial, ya que impactan directamente en los costos, la eficiencia y la robustez del sistema.
+Los modelos de servicio cloud (IaaS, PaaS, SaaS) definen niveles de responsabilidad y control
+, y su elección estratégica permite optimizar el uso de recursos humanos y técnicos. Entender qué se gestiona y qué se delega en cada modelo es central para diseñar soluciones sostenibles.
+El enfoque serverless habilita arquitecturas más ágiles, económicas y desacopladas
+, especialmente útiles para tareas unitarias y de alta frecuencia. Sin embargo, implica desafíos en trazabilidad, depuración y tiempo de ejecución, que deben ser contemplados en la planificación.
+Las arquitecturas basadas en eventos permiten operar con datos en tiempo real, desacoplar servicios y escalar por componentes, consolidando un modelo de sistema que no reacciona por consulta, sino por notificación.
+Este paradigma, habilitado por tecnologías como Kafka, Pub/Sub o SQS, cambia la forma en que se diseñan los flujos de información.
+El recorrido por el
+caso FleetSync
+mostró cómo estas decisiones técnicas no solo resuelven problemas operativos concretos, sino que configuran una nueva manera de concebir el diseño de software en la nube.
+La computación cloud no es únicamente una cuestión de infraestructura, sino un marco conceptual y práctico que redefine las bases de la arquitectura moderna.
+
+  SIGUIENTE
+
+================================================================================
+Proyecto integrador [blocks]
+================================================================================
+  4° avance
+
+  Detalle de avance:
+  En esta fase,
+avanzaremos al siguiente nivel
+,
+poblando nuestras tablas con datos
+. Utilizaremos sentencias DML, como INSERT, UPDATE y DELETE, para gestionar la información almacenada en la base de datos. Además, exploraremos consultas que nos permitirán
+extraer resultados básicos
+.
+
+  Disponibilizar mediante una API el modelo creado.
+  Crear una imagen que contenga las librerías y el código para una app.
+model_deploy.py
+: Se toma el mejor modelo desplegado y una imagen que contenga las librerías y el código para una app que permita disponibilizar dicho objeto y despliega el modelo en un endpoint que puede utilizarse para predicciones (por batch).
+Este script es el núcleo del despliegue. Sus responsabilidades incluyen:
+Carga del modelo entrenado (por ejemplo, desde un archivo .pkl o .joblib)
+Definición de la lógica de predicción: recibe datos, aplica transformaciones necesarias y retorna resultados.
+Exposición del modelo como servicio: usando frameworks como FastAPI o Flask, se define un endpoint /predict que acepta datos en formato JSON o CSV y retorna predicciones.
+Soporte para predicción por lotes: permite enviar múltiples registros en una sola solicitud.
+Imagen Docker:
+Se construye una imagen que contiene:
+El código fuente.
+Las dependencias necesarias (requirements.txt)
+El servidor de aplicación (por ejemplo, Uvicorn si se usa FastAPI)
+Archivos de configuración (Dockerfile, .dockerignore)
+
+  🟡 Conocimientos necesarios
+  Fundamentos de las APIs y FastAPI,
+Funciones básicas,
+Métodos y parámetros en FastAPI,
+Creación de API para un modelo de ML con FastAPI,
+Visualización de modelos con Streamlit,
+Desarrollo de una aplicación web de Streamlit para ML, Docker.
+  🟡 Tech Stack necesario
+  Fast API,
+Docker,
+Streamlit.
+
+================================================================================
+Feedback [blocks]
+================================================================================
+  [recurso]
+  <iframe src="https://airtable.com/embed/appqMsKXhahDwA7lL/pagUns5rEbJFXjbt8/form" frameborder="0" width="100%" height="533"></iframe>
+
+  FIN DE LA LECCIÓN
