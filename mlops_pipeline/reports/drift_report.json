@@ -1,0 +1,193 @@
+{
+  "reference_rows": 2674,
+  "current_rows": 2326,
+  "drifted_features": [
+    "low_engagement_flag",
+    "sessions_week",
+    "avg_session_min",
+    "support_tickets_3m",
+    "engagement_minutes_week"
+  ],
+  "summary": [
+    {
+      "feature": "low_engagement_flag",
+      "type": "numeric",
+      "psi": 0.0,
+      "ks_stat": 0.36962443992691635,
+      "ks_p_value": 1.0055752070936268e-151,
+      "js_distance": NaN,
+      "chi2_p_value": NaN,
+      "drift_detected": true
+    },
+    {
+      "feature": "sessions_week",
+      "type": "numeric",
+      "psi": 0.7995482167086536,
+      "ks_stat": 0.3284457638313211,
+      "ks_p_value": 2.7629652660666484e-119,
+      "js_distance": NaN,
+      "chi2_p_value": NaN,
+      "drift_detected": true
+    },
+    {
+      "feature": "avg_session_min",
+      "type": "numeric",
+      "psi": 0.6299820455551772,
+      "ks_stat": 0.29675239608702897,
+      "ks_p_value": 4.01914064396128e-97,
+      "js_distance": NaN,
+      "chi2_p_value": NaN,
+      "drift_detected": true
+    },
+    {
+      "feature": "support_tickets_3m",
+      "type": "numeric",
+      "psi": 0.47006574249344724,
+      "ks_stat": 0.7314884068810771,
+      "ks_p_value": 0.0,
+      "js_distance": NaN,
+      "chi2_p_value": NaN,
+      "drift_detected": true
+    },
+    {
+      "feature": "engagement_minutes_week",
+      "type": "numeric",
+      "psi": 1.0674892783576284,
+      "ks_stat": 0.373540369315423,
+      "ks_p_value": 4.986656983138294e-155,
+      "js_distance": NaN,
+      "chi2_p_value": NaN,
+      "drift_detected": true
+    },
+    {
+      "feature": "auto_renew",
+      "type": "numeric",
+      "psi": 0.0,
+      "ks_stat": 0.01164971307408496,
+      "ks_p_value": 0.9950074034191546,
+      "js_distance": NaN,
+      "chi2_p_value": NaN,
+      "drift_detected": false
+    },
+    {
+      "feature": "early_tenure_flag",
+      "type": "numeric",
+      "psi": 0.0,
+      "ks_stat": 0.003322012359390867,
+      "ks_p_value": 1.0,
+      "js_distance": NaN,
+      "chi2_p_value": NaN,
+      "drift_detected": false
+    },
+    {
+      "feature": "high_discount_flag",
+      "type": "numeric",
+      "psi": 0.0,
+      "ks_stat": 0.004073171092479345,
+      "ks_p_value": 1.0,
+      "js_distance": NaN,
+      "chi2_p_value": NaN,
+      "drift_detected": false
+    },
+    {
+      "feature": "late_payment_flag",
+      "type": "numeric",
+      "psi": 0.0,
+      "ks_stat": 0.0066980464084901515,
+      "ks_p_value": 0.9999999922197812,
+      "js_distance": NaN,
+      "chi2_p_value": NaN,
+      "drift_detected": false
+    },
+    {
+      "feature": "tickets_per_tenure",
+      "type": "numeric",
+      "psi": 0.0019423312224748543,
+      "ks_stat": 0.027431120737833384,
+      "ks_p_value": 0.299248682401764,
+      "js_distance": NaN,
+      "chi2_p_value": NaN,
+      "drift_detected": false
+    },
+    {
+      "feature": "age",
+      "type": "numeric",
+      "psi": 0.012855679148502507,
+      "ks_stat": 0.026805369498710874,
+      "ks_p_value": 0.3254721561074263,
+      "js_distance": NaN,
+      "chi2_p_value": NaN,
+      "drift_detected": false
+    },
+    {
+      "feature": "late_payments_6m",
+      "type": "numeric",
+      "psi": 0.0012776325952444762,
+      "ks_stat": 0.0066980464084901515,
+      "ks_p_value": 0.9999999922197812,
+      "js_distance": NaN,
+      "chi2_p_value": NaN,
+      "drift_detected": false
+    },
+    {
+      "feature": "tenure_months",
+      "type": "numeric",
+      "psi": 0.011158766368025569,
+      "ks_stat": 0.015981416538740304,
+      "ks_p_value": 0.9015221863793531,
+      "js_distance": NaN,
+      "chi2_p_value": NaN,
+      "drift_detected": false
+    },
+    {
+      "feature": "notif_click_rate",
+      "type": "numeric",
+      "psi": 0.0026232216118511433,
+      "ks_stat": 0.016886922956709977,
+      "ks_p_value": 0.861900426129275,
+      "js_distance": NaN,
+      "chi2_p_value": NaN,
+      "drift_detected": false
+    },
+    {
+      "feature": "plan",
+      "type": "categorical",
+      "psi": NaN,
+      "ks_stat": NaN,
+      "ks_p_value": NaN,
+      "js_distance": 0.01151340310524982,
+      "chi2_p_value": 0.5170180564289881,
+      "drift_detected": false
+    },
+    {
+      "feature": "channel",
+      "type": "categorical",
+      "psi": NaN,
+      "ks_stat": NaN,
+      "ks_p_value": NaN,
+      "js_distance": 0.010519911150136382,
+      "chi2_p_value": 0.5767543826136674,
+      "drift_detected": false
+    },
+    {
+      "feature": "region",
+      "type": "categorical",
+      "psi": NaN,
+      "ks_stat": NaN,
+      "ks_p_value": NaN,
+      "js_distance": 0.011881048654780485,
+      "chi2_p_value": 0.8432207228014456,
+      "drift_detected": false
+    },
+    {
+      "feature": "discount_pct_3m",
+      "type": "numeric",
+      "psi": 0.1550221887697305,
+      "ks_stat": 0.15651337583468333,
+      "ks_p_value": 4.6629827737617e-27,
+      "js_distance": NaN,
+      "chi2_p_value": NaN,
+      "drift_detected": false
+    }
+  ]
+}

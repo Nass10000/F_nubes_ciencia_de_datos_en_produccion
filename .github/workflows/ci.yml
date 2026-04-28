@@ -1,0 +1,22 @@
+name: mlops-pipeline-ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r mlops_pipeline/requirements.txt
+      - name: Train model
+        run: python mlops_pipeline/src/model_training_evaluation.py
+      - name: Generate monitoring report
+        run: python mlops_pipeline/src/model_monitoring.py
+      - name: Run tests
+        run: pytest -q mlops_pipeline/tests
