@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+import json
+import os
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
+
 import pandas as pd
 import streamlit as st
 
@@ -9,6 +14,7 @@ from src.model_deploy import predict_records
 from src.model_monitoring import generate_monitoring_report
 
 
+API_URL = os.getenv("CUSTOMER_CHURNX_API_URL", "http://127.0.0.1:5000/predict")
 REGIONS = ["North", "South", "East", "West", "Center"]
 CHANNELS = ["web", "store", "app"]
 PLANS = ["Basic", "Plus", "Premium"]
@@ -50,14 +56,49 @@ def build_customer_record() -> dict:
     }
 
 
+def request_api_predictions(records: list[dict]) -> list[dict]:
+    """Call the FastAPI prediction endpoint used by the Docker service."""
+    payload = json.dumps({"records": records}).encode("utf-8")
+    request = Request(
+        API_URL,
+        data=payload,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    with urlopen(request, timeout=10) as response:
+        data = json.loads(response.read().decode("utf-8"))
+    return data["results"]
+
+
+def run_predictions(records: list[dict]) -> tuple[list[dict], str]:
+    """Predict through the API first, then fall back to local inference."""
+    try:
+        return request_api_predictions(records), "API FastAPI"
+    except (
+        HTTPError,
+        URLError,
+        TimeoutError,
+        OSError,
+        KeyError,
+        json.JSONDecodeError,
+    ) as exc:
+        st.warning(
+            f"No se pudo conectar con la API en {API_URL}. "
+            f"Se usa el modelo local. Detalle: {exc}"
+        )
+        return predict_records(records), "modelo local"
+
+
 def render_single_prediction() -> None:
     """Render single-customer prediction controls and result."""
     st.subheader("Prediccion individual")
     record = build_customer_record()
     if st.button("Predecir churn", type="primary"):
-        result = predict_records([record])[0]
+        predictions, source = run_predictions([record])
+        result = predictions[0]
         probability = result["churn_probability"]
         prediction_text = "Riesgo de churn" if result["prediction"] == 1 else "Sin churn esperado"
+        st.caption(f"Origen de la prediccion: {source}")
         st.metric("Resultado", prediction_text)
         st.metric("Probabilidad de churn", f"{probability:.2%}")
         st.json({"entrada": record, "salida": result})
@@ -74,7 +115,9 @@ def render_batch_prediction() -> None:
     st.dataframe(input_df.head(20), width="stretch")
     if st.button("Predecir archivo CSV"):
         records = input_df.drop(columns=["churn"], errors="ignore").to_dict(orient="records")
-        predictions = pd.DataFrame(predict_records(records))
+        prediction_records, source = run_predictions(records)
+        st.caption(f"Origen de la prediccion: {source}")
+        predictions = pd.DataFrame(prediction_records)
         st.dataframe(predictions, width="stretch")
         csv = predictions.to_csv(index=False).encode("utf-8")
         st.download_button(

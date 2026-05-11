@@ -75,6 +75,7 @@ Con `-p 5000:5000`, el puerto del host coincide con el puerto interno de Uvicorn
 ## Streamlit
 
 La app web permite cargar datos de un cliente, predecir su probabilidad de churn, cargar un CSV para prediccion batch y revisar monitoreo de drift.
+Por defecto consume la API en `http://127.0.0.1:5000/predict`; se puede cambiar con la variable `CUSTOMER_CHURNX_API_URL`.
 
 ```bash
 streamlit run streamlit_app.py
