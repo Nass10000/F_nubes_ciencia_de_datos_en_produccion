@@ -170,12 +170,12 @@ def streamlit_dashboard() -> None:
     report = generate_monitoring_report()
     drift_count = int(report["drift_detected"].sum())
     st.metric("Variables con drift", drift_count)
-    st.dataframe(report, use_container_width=True)
+    st.dataframe(report, width="stretch")
     st.bar_chart(report.set_index("feature")["psi"].fillna(0))
     if drift_count:
         st.warning("Se recomienda revisar el pipeline y evaluar reentrenamiento.")
     else:
-        st.success("No se detectan alertas críticas de drift.")
+        st.success("No se detectan alertas criticas de drift.")
 
 
 if __name__ == "__main__":

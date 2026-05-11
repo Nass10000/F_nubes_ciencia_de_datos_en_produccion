@@ -81,6 +81,12 @@ Con `-p 5000:5000`, el puerto del host coincide con el puerto interno de Uvicorn
 
 Variables con drift detectado en la corrida validada: `low_engagement_flag`, `sessions_week`, `avg_session_min`, `support_tickets_3m` y `engagement_minutes_week`.
 
+Para abrir el dashboard de monitoreo:
+
+```bash
+streamlit run streamlit_app.py
+```
+
 ## Gitflow
 
 El repositorio debe tener tres ramas:
