@@ -99,6 +99,19 @@ def build_reference_and_current(
     return reference, current
 
 
+def resolve_monitoring_mode(mode: str) -> bool:
+    """Return whether the monitoring run should simulate drift."""
+    options = {
+        "real": False,
+        "simulated": True,
+        "demo": True,
+    }
+    try:
+        return options[mode]
+    except KeyError as exc:
+        raise ValueError(f"Unsupported monitoring mode: {mode}") from exc
+
+
 def detect_drift(
     reference: pd.DataFrame,
     current: pd.DataFrame,
@@ -142,11 +155,15 @@ def detect_drift(
     return pd.DataFrame(rows).sort_values("drift_detected", ascending=False)
 
 
-def generate_monitoring_report(path: str | Path = DATA_PATH) -> pd.DataFrame:
+def generate_monitoring_report(
+    path: str | Path = DATA_PATH,
+    mode: str = "real",
+) -> pd.DataFrame:
     """Create drift reports and prediction samples for operational evidence."""
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
-    reference, current = build_reference_and_current(path)
+    simulate_shift = resolve_monitoring_mode(mode)
+    reference, current = build_reference_and_current(path, simulate_shift=simulate_shift)
     load_trained_model()
     predictions = predict_records(current.drop(columns=[TARGET]).head(500).to_dict("records"))
     pd.DataFrame(predictions).to_csv(REPORTS_DIR / "current_predictions_sample.csv", index=False)
@@ -154,6 +171,7 @@ def generate_monitoring_report(path: str | Path = DATA_PATH) -> pd.DataFrame:
     report = detect_drift(reference, current)
     report.to_csv(DRIFT_REPORT_CSV, index=False)
     payload = {
+        "mode": mode,
         "reference_rows": int(len(reference)),
         "current_rows": int(len(current)),
         "drifted_features": report.loc[report["drift_detected"], "feature"].tolist(),
@@ -170,8 +188,18 @@ def streamlit_dashboard() -> None:
 
     st.set_page_config(page_title="CustomerChurnX Monitoring", layout="wide")
     st.title("CustomerChurnX - Monitoreo de Data Drift")
-    report = generate_monitoring_report()
+    mode = st.radio(
+        "Modo de monitoreo",
+        options=["real", "simulated"],
+        format_func=lambda value: "Real" if value == "real" else "Simulado",
+        horizontal=True,
+    )
+    report = generate_monitoring_report(mode=mode)
     drift_count = int(report["drift_detected"].sum())
+    if mode == "real":
+        st.caption("Compara ventanas historicas y recientes de la base sin alterar los datos.")
+    else:
+        st.caption("Aplica una alteracion controlada para demostrar un escenario con drift.")
     st.metric("Variables con drift", drift_count)
     st.dataframe(report, width="stretch")
     st.bar_chart(report.set_index("feature")["psi"].fillna(0))

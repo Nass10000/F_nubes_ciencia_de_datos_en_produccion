@@ -83,12 +83,12 @@ streamlit run streamlit_app.py
 
 ## Monitoreo
 
-`model_monitoring.py` compara una ventana historica contra un lote actual simulado. Calcula PSI, KS, chi-cuadrado y Jensen-Shannon. El reporte queda en:
+`model_monitoring.py` compara una ventana historica contra una ventana reciente. En modo `real` usa la base tal como esta; en modo `simulated` introduce cambios controlados para demostrar drift. Calcula PSI, KS, chi-cuadrado y Jensen-Shannon. El reporte queda en:
 
 - `reports/drift_report.csv`
 - `reports/drift_report.json`
 
-Variables con drift detectado en la corrida validada: `low_engagement_flag`, `sessions_week`, `avg_session_min`, `support_tickets_3m` y `engagement_minutes_week`.
+En la corrida validada en modo `real` no se detecto drift fuerte. En modo `simulated` se detectan: `low_engagement_flag`, `sessions_week`, `avg_session_min`, `support_tickets_3m` y `engagement_minutes_week`.
 
 Para abrir solo el dashboard de monitoreo desde el modulo:
 

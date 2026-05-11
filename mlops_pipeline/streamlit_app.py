@@ -131,8 +131,19 @@ def render_batch_prediction() -> None:
 def render_monitoring() -> None:
     """Render drift monitoring controls and result."""
     st.subheader("Monitoreo de data drift")
-    report = generate_monitoring_report()
+    mode = st.radio(
+        "Modo de monitoreo",
+        options=["real", "simulated"],
+        format_func=lambda value: "Real" if value == "real" else "Simulado",
+        horizontal=True,
+        key="monitoring_mode",
+    )
+    report = generate_monitoring_report(mode=mode)
     drift_count = int(report["drift_detected"].sum())
+    if mode == "real":
+        st.caption("Compara ventanas reales de la base sin introducir cambios artificiales.")
+    else:
+        st.caption("Modo de demostracion: fuerza cambios en variables clave para evidenciar drift.")
     st.metric("Variables con drift", drift_count)
     st.dataframe(report.round(4), width="stretch")
     chart_data = report.set_index("feature")["psi"].fillna(0).sort_values(ascending=False)

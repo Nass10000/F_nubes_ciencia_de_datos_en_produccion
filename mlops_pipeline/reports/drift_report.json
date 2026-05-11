@@ -1,70 +1,25 @@
 {
+  "mode": "real",
   "reference_rows": 2674,
   "current_rows": 2326,
-  "drifted_features": [
-    "low_engagement_flag",
-    "sessions_week",
-    "avg_session_min",
-    "support_tickets_3m",
-    "engagement_minutes_week"
-  ],
+  "drifted_features": [],
   "summary": [
     {
-      "feature": "low_engagement_flag",
+      "feature": "age",
       "type": "numeric",
-      "psi": 0.0,
-      "ks_stat": 0.3627456781040445,
-      "ks_p_value": 5.158667444276318e-146,
+      "psi": 0.012855679148502507,
+      "ks_stat": 0.026805369498710874,
+      "ks_p_value": 0.3254721561074263,
       "js_distance": NaN,
       "chi2_p_value": NaN,
-      "drift_detected": true
+      "drift_detected": false
     },
     {
-      "feature": "sessions_week",
+      "feature": "tenure_months",
       "type": "numeric",
-      "psi": 0.7995482167086536,
-      "ks_stat": 0.3284457638313211,
-      "ks_p_value": 2.7629652660666484e-119,
-      "js_distance": NaN,
-      "chi2_p_value": NaN,
-      "drift_detected": true
-    },
-    {
-      "feature": "avg_session_min",
-      "type": "numeric",
-      "psi": 0.6299820455551772,
-      "ks_stat": 0.29675239608702897,
-      "ks_p_value": 4.01914064396128e-97,
-      "js_distance": NaN,
-      "chi2_p_value": NaN,
-      "drift_detected": true
-    },
-    {
-      "feature": "support_tickets_3m",
-      "type": "numeric",
-      "psi": 0.47006574249344724,
-      "ks_stat": 0.7314884068810771,
-      "ks_p_value": 0.0,
-      "js_distance": NaN,
-      "chi2_p_value": NaN,
-      "drift_detected": true
-    },
-    {
-      "feature": "engagement_minutes_week",
-      "type": "numeric",
-      "psi": 1.0674892783576284,
-      "ks_stat": 0.373540369315423,
-      "ks_p_value": 4.986656983138294e-155,
-      "js_distance": NaN,
-      "chi2_p_value": NaN,
-      "drift_detected": true
-    },
-    {
-      "feature": "auto_renew",
-      "type": "numeric",
-      "psi": 0.0,
-      "ks_stat": 0.01164971307408496,
-      "ks_p_value": 0.9950074034191546,
+      "psi": 0.011158766368025569,
+      "ks_stat": 0.015981416538740304,
+      "ks_p_value": 0.9015221863793531,
       "js_distance": NaN,
       "chi2_p_value": NaN,
       "drift_detected": false
@@ -110,11 +65,21 @@
       "drift_detected": false
     },
     {
-      "feature": "age",
+      "feature": "engagement_minutes_week",
       "type": "numeric",
-      "psi": 0.012855679148502507,
-      "ks_stat": 0.026805369498710874,
-      "ks_p_value": 0.3254721561074263,
+      "psi": 0.007400087993529611,
+      "ks_stat": 0.03574660226080771,
+      "ks_p_value": 0.08064282774052088,
+      "js_distance": NaN,
+      "chi2_p_value": NaN,
+      "drift_detected": false
+    },
+    {
+      "feature": "auto_renew",
+      "type": "numeric",
+      "psi": 0.0,
+      "ks_stat": 0.01164971307408496,
+      "ks_p_value": 0.9950074034191546,
       "js_distance": NaN,
       "chi2_p_value": NaN,
       "drift_detected": false
@@ -130,11 +95,21 @@
       "drift_detected": false
     },
     {
-      "feature": "tenure_months",
+      "feature": "discount_pct_3m",
       "type": "numeric",
-      "psi": 0.011158766368025569,
-      "ks_stat": 0.015981416538740304,
-      "ks_p_value": 0.9015221863793531,
+      "psi": 0.008012664381492719,
+      "ks_stat": 0.0259294463870101,
+      "ks_p_value": 0.3647307687986352,
+      "js_distance": NaN,
+      "chi2_p_value": NaN,
+      "drift_detected": false
+    },
+    {
+      "feature": "support_tickets_3m",
+      "type": "numeric",
+      "psi": 0.0014514075349623737,
+      "ks_stat": 0.023025780565182636,
+      "ks_p_value": 0.5146389846152946,
       "js_distance": NaN,
       "chi2_p_value": NaN,
       "drift_detected": false
@@ -145,6 +120,26 @@
       "psi": 0.0026232216118511433,
       "ks_stat": 0.016886922956709977,
       "ks_p_value": 0.861900426129275,
+      "js_distance": NaN,
+      "chi2_p_value": NaN,
+      "drift_detected": false
+    },
+    {
+      "feature": "avg_session_min",
+      "type": "numeric",
+      "psi": 0.011654436810597553,
+      "ks_stat": 0.03565978168806204,
+      "ks_p_value": 0.08190235348814204,
+      "js_distance": NaN,
+      "chi2_p_value": NaN,
+      "drift_detected": false
+    },
+    {
+      "feature": "sessions_week",
+      "type": "numeric",
+      "psi": 0.010961787256091314,
+      "ks_stat": 0.0322123618347052,
+      "ks_p_value": 0.1470087263453199,
       "js_distance": NaN,
       "chi2_p_value": NaN,
       "drift_detected": false
@@ -180,11 +175,11 @@
       "drift_detected": false
     },
     {
-      "feature": "discount_pct_3m",
+      "feature": "low_engagement_flag",
       "type": "numeric",
-      "psi": 0.1550221887697305,
-      "ks_stat": 0.15651337583468333,
-      "ks_p_value": 4.6629827737617e-27,
+      "psi": 0.0,
+      "ks_stat": 0.020097354802238815,
+      "ks_p_value": 0.6860857778605307,
       "js_distance": NaN,
       "chi2_p_value": NaN,
       "drift_detected": false

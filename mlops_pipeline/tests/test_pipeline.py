@@ -13,6 +13,7 @@ from ft_engineering import (
     load_data,
 )
 from model_deploy import predict_records
+from model_monitoring import generate_monitoring_report, resolve_monitoring_mode
 
 
 def test_dataset_schema_and_target():
@@ -67,3 +68,12 @@ def test_prediction_contract():
     assert set(result) == {"customer_id", "prediction", "churn_probability"}
     assert result["prediction"] in {0, 1}
     assert 0 <= result["churn_probability"] <= 1
+
+
+def test_monitoring_modes_are_distinct():
+    real_report = generate_monitoring_report(mode="real")
+    simulated_report = generate_monitoring_report(mode="simulated")
+
+    assert resolve_monitoring_mode("real") is False
+    assert resolve_monitoring_mode("simulated") is True
+    assert int(real_report["drift_detected"].sum()) <= int(simulated_report["drift_detected"].sum())
