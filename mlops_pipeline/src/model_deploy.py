@@ -3,16 +3,31 @@
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
 
 try:
-    from ft_engineering import DATA_PATH, REPORTS_DIR, add_features, clean_data, load_data
+    from ft_engineering import (
+        ARTIFACTS_DIR,
+        DATA_PATH,
+        REPORTS_DIR,
+        add_features,
+        clean_data,
+        load_data,
+    )
     from model_training_evaluation import load_trained_model
 except ImportError:
-    from .ft_engineering import DATA_PATH, REPORTS_DIR, add_features, clean_data, load_data
+    from .ft_engineering import (
+        ARTIFACTS_DIR,
+        DATA_PATH,
+        REPORTS_DIR,
+        add_features,
+        clean_data,
+        load_data,
+    )
     from .model_training_evaluation import load_trained_model
 
 try:
@@ -25,11 +40,22 @@ except ImportError:  # Allows local batch inference without the API dependency.
     Field = None
 
 
+SCHEMA_PATH = ARTIFACTS_DIR / "feature_schema.json"
+
+
 class PredictionRequest(BaseModel):
     """Flexible request schema for one or many customer records."""
 
     records: list[dict[str, Any]] | None = None
     record: dict[str, Any] | None = None
+
+
+def load_feature_params() -> dict[str, float]:
+    """Load feature parameters saved during training for inference consistency."""
+    if not SCHEMA_PATH.exists():
+        return {}
+    schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+    return schema.get("feature_params", {})
 
 
 def _prepare_records(records: list[dict[str, Any]]) -> pd.DataFrame:
@@ -38,7 +64,11 @@ def _prepare_records(records: list[dict[str, Any]]) -> pd.DataFrame:
         df["churn"] = 0
     if "customer_id" not in df.columns:
         df["customer_id"] = [f"REQ{i:06d}" for i in range(len(df))]
-    return add_features(clean_data(df))
+    feature_params = load_feature_params()
+    return add_features(
+        clean_data(df),
+        low_engagement_threshold=feature_params.get("low_engagement_threshold"),
+    )
 
 
 def predict_records(records: list[dict[str, Any]]) -> list[dict[str, Any]]:

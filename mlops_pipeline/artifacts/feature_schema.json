@@ -1,6 +1,9 @@
 {
   "target": "churn",
   "best_model": "logistic_regression",
+  "feature_params": {
+    "low_engagement_threshold": 54.69499999999999
+  },
   "numerical_columns": [
     "signup_month",
     "age",

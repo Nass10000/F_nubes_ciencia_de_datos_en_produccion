@@ -5,7 +5,13 @@ PROJECT_DIR = Path(__file__).resolve().parents[1]
 SRC_DIR = PROJECT_DIR / "src"
 sys.path.insert(0, str(SRC_DIR))
 
-from ft_engineering import TARGET, add_features, clean_data, load_data
+from ft_engineering import (
+    TARGET,
+    add_features,
+    calculate_low_engagement_threshold,
+    clean_data,
+    load_data,
+)
 from model_deploy import predict_records
 
 
@@ -27,6 +33,18 @@ def test_feature_engineering_creates_expected_columns():
         "low_engagement_flag",
     }
     assert expected.issubset(df.columns)
+
+
+def test_low_engagement_flag_uses_reference_threshold():
+    df = clean_data(load_data(PROJECT_DIR / "Base_de_datos.csv"))
+    threshold = calculate_low_engagement_threshold(df)
+    sample = df.head(1).copy()
+    sample["sessions_week"] = 3
+    sample["avg_session_min"] = 8.5
+
+    featured = add_features(sample, low_engagement_threshold=threshold)
+
+    assert featured["low_engagement_flag"].iloc[0] == 1
 
 
 def test_prediction_contract():

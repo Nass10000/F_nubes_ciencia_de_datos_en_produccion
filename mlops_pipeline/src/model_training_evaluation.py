@@ -27,6 +27,7 @@ try:
         REPORTS_DIR,
         TARGET,
         add_features,
+        calculate_low_engagement_threshold,
         clean_data,
         get_feature_columns,
         load_data,
@@ -40,6 +41,7 @@ except ImportError:
         REPORTS_DIR,
         TARGET,
         add_features,
+        calculate_low_engagement_threshold,
         clean_data,
         get_feature_columns,
         load_data,
@@ -130,11 +132,19 @@ def train_and_evaluate(data_path: str | Path = DATA_PATH) -> pd.DataFrame:
         REPORTS_DIR / "confusion_matrix.csv", index=False
     )
 
-    full_df = add_features(clean_data(load_data(data_path)))
+    clean_df = clean_data(load_data(data_path))
+    low_engagement_threshold = calculate_low_engagement_threshold(clean_df)
+    full_df = add_features(
+        clean_df,
+        low_engagement_threshold=low_engagement_threshold,
+    )
     numerical_columns, categorical_columns = get_feature_columns(full_df)
     schema = {
         "target": TARGET,
         "best_model": str(best_model_name),
+        "feature_params": {
+            "low_engagement_threshold": low_engagement_threshold,
+        },
         "numerical_columns": numerical_columns,
         "categorical_columns": categorical_columns,
         "input_columns": numerical_columns + categorical_columns,

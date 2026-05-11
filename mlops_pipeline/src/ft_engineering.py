@@ -23,6 +23,12 @@ ID_COLUMN = "customer_id"
 RANDOM_STATE = 42
 
 
+def calculate_low_engagement_threshold(df: pd.DataFrame) -> float:
+    """Return the reference weekly engagement threshold for feature creation."""
+    engagement_minutes = df["sessions_week"] * df["avg_session_min"]
+    return float(engagement_minutes.median())
+
+
 def load_data(path: str | Path = DATA_PATH) -> pd.DataFrame:
     """Load the project dataset and validate the minimum expected schema."""
     df = pd.read_csv(path)
@@ -86,7 +92,9 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
     return clean
 
 
-def add_features(df: pd.DataFrame) -> pd.DataFrame:
+def add_features(
+    df: pd.DataFrame, low_engagement_threshold: float | None = None
+) -> pd.DataFrame:
     """Create business-oriented features used by training and inference."""
     features = df.copy()
     features["engagement_minutes_week"] = (
@@ -98,9 +106,10 @@ def add_features(df: pd.DataFrame) -> pd.DataFrame:
     features["late_payment_flag"] = (features["late_payments_6m"] > 0).astype(int)
     features["high_discount_flag"] = (features["discount_pct_3m"] >= 0.20).astype(int)
     features["early_tenure_flag"] = (features["tenure_months"] < 6).astype(int)
+    if low_engagement_threshold is None:
+        low_engagement_threshold = float(features["engagement_minutes_week"].median())
     features["low_engagement_flag"] = (
-        features["engagement_minutes_week"]
-        < features["engagement_minutes_week"].median()
+        features["engagement_minutes_week"] < low_engagement_threshold
     ).astype(int)
     return features
 
@@ -146,7 +155,9 @@ def make_training_dataset(
     path: str | Path = DATA_PATH, test_size: float = 0.20
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series, ColumnTransformer]:
     """Create train/test splits and the preprocessing object."""
-    df = add_features(clean_data(load_data(path)))
+    clean_df = clean_data(load_data(path))
+    threshold = calculate_low_engagement_threshold(clean_df)
+    df = add_features(clean_df, low_engagement_threshold=threshold)
     numerical_columns, categorical_columns = get_feature_columns(df)
     preprocessor = build_preprocessor(numerical_columns, categorical_columns)
     x = df[numerical_columns + categorical_columns]
@@ -163,7 +174,9 @@ def make_training_dataset(
 def save_reference_sample(path: str | Path = DATA_PATH) -> Path:
     """Save a baseline sample used later by the drift monitoring script."""
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
-    df = add_features(clean_data(load_data(path)))
+    clean_df = clean_data(load_data(path))
+    threshold = calculate_low_engagement_threshold(clean_df)
+    df = add_features(clean_df, low_engagement_threshold=threshold)
     reference = df[df["signup_month"] <= df["signup_month"].median()].copy()
     output_path = ARTIFACTS_DIR / "reference_sample.csv"
     reference.to_csv(output_path, index=False)
@@ -171,7 +184,11 @@ def save_reference_sample(path: str | Path = DATA_PATH) -> Path:
 
 
 if __name__ == "__main__":
-    dataframe = add_features(clean_data(load_data()))
+    clean_dataframe = clean_data(load_data())
+    dataframe = add_features(
+        clean_dataframe,
+        low_engagement_threshold=calculate_low_engagement_threshold(clean_dataframe),
+    )
     save_reference_sample()
     print(f"Rows: {len(dataframe):,}")
     print(f"Columns: {len(dataframe.columns):,}")

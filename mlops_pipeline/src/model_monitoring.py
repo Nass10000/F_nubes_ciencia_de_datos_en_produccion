@@ -17,6 +17,7 @@ try:
         REPORTS_DIR,
         TARGET,
         add_features,
+        calculate_low_engagement_threshold,
         clean_data,
         load_data,
     )
@@ -29,6 +30,7 @@ except ImportError:
         REPORTS_DIR,
         TARGET,
         add_features,
+        calculate_low_engagement_threshold,
         clean_data,
         load_data,
     )
@@ -76,7 +78,9 @@ def build_reference_and_current(
     path: str | Path = DATA_PATH, simulate_shift: bool = True
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Split the dataset into historical/current windows and simulate recent drift."""
-    df = add_features(clean_data(load_data(path)))
+    clean_df = clean_data(load_data(path))
+    threshold = calculate_low_engagement_threshold(clean_df)
+    df = add_features(clean_df, low_engagement_threshold=threshold)
     cutoff = df["signup_month"].median()
     reference = df[df["signup_month"] <= cutoff].copy()
     current = df[df["signup_month"] > cutoff].copy()
@@ -87,8 +91,7 @@ def build_reference_and_current(
         current["support_tickets_3m"] = (current["support_tickets_3m"] + 1).clip(upper=6)
         current["discount_pct_3m"] = (current["discount_pct_3m"] * 1.35).clip(upper=1)
         current["low_engagement_flag"] = (
-            current["sessions_week"] * current["avg_session_min"]
-            < reference["engagement_minutes_week"].median()
+            current["sessions_week"] * current["avg_session_min"] < threshold
         ).astype(int)
         current["engagement_minutes_week"] = (
             current["sessions_week"] * current["avg_session_min"]

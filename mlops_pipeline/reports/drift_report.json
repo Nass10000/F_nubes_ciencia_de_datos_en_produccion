@@ -13,8 +13,8 @@
       "feature": "low_engagement_flag",
       "type": "numeric",
       "psi": 0.0,
-      "ks_stat": 0.36962443992691635,
-      "ks_p_value": 1.0055752070936268e-151,
+      "ks_stat": 0.3627456781040445,
+      "ks_p_value": 5.158667444276318e-146,
       "js_distance": NaN,
       "chi2_p_value": NaN,
       "drift_detected": true
