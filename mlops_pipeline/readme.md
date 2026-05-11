@@ -72,6 +72,14 @@ docker run --rm -p 5000:5000 customer-churnx
 
 Con `-p 5000:5000`, el puerto del host coincide con el puerto interno de Uvicorn. Con `-p 8000:5000`, la API queda disponible en el host por el puerto 8000. Con `-p 5000:8000`, no funcionara si la app sigue escuchando internamente en 5000.
 
+## Streamlit
+
+La app web permite cargar datos de un cliente, predecir su probabilidad de churn, cargar un CSV para prediccion batch y revisar monitoreo de drift.
+
+```bash
+streamlit run streamlit_app.py
+```
+
 ## Monitoreo
 
 `model_monitoring.py` compara una ventana historica contra un lote actual simulado. Calcula PSI, KS, chi-cuadrado y Jensen-Shannon. El reporte queda en:
@@ -81,10 +89,10 @@ Con `-p 5000:5000`, el puerto del host coincide con el puerto interno de Uvicorn
 
 Variables con drift detectado en la corrida validada: `low_engagement_flag`, `sessions_week`, `avg_session_min`, `support_tickets_3m` y `engagement_minutes_week`.
 
-Para abrir el dashboard de monitoreo:
+Para abrir solo el dashboard de monitoreo desde el modulo:
 
 ```bash
-streamlit run streamlit_app.py
+streamlit run src/model_monitoring.py
 ```
 
 ## Gitflow
