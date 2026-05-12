@@ -1,4 +1,4 @@
-"""Data drift monitoring and optional Streamlit dashboard."""
+"""Calcula drift de datos y genera el dashboard de monitoreo."""
 
 from __future__ import annotations
 
@@ -45,7 +45,7 @@ DRIFT_REPORT_JSON = REPORTS_DIR / "drift_report.json"
 def population_stability_index(
     expected: pd.Series, actual: pd.Series, bins: int = 10
 ) -> float:
-    """Calculate PSI for a numerical variable."""
+    """Calcula el PSI para medir cambio de distribucion en una variable numerica."""
     expected = expected.dropna()
     actual = actual.dropna()
     if expected.nunique() <= 1 or actual.empty:
@@ -55,6 +55,7 @@ def population_stability_index(
     bin_edges[-1] = np.inf
     expected_pct = pd.cut(expected, bin_edges).value_counts(normalize=True).sort_index()
     actual_pct = pd.cut(actual, bin_edges).value_counts(normalize=True).sort_index()
+    # Estos valores pequenos evitan divisiones por cero en los buckets.
     expected_pct, actual_pct = expected_pct.align(actual_pct, fill_value=0.0001)
     expected_pct = expected_pct.replace(0, 0.0001)
     actual_pct = actual_pct.replace(0, 0.0001)
@@ -62,7 +63,7 @@ def population_stability_index(
 
 
 def categorical_drift(expected: pd.Series, actual: pd.Series) -> tuple[float, float]:
-    """Return chi-square p-value and Jensen-Shannon distance."""
+    """Mide drift en variables categoricas con chi-cuadrado y Jensen-Shannon."""
     expected_counts = expected.fillna("missing").astype(str).value_counts()
     actual_counts = actual.fillna("missing").astype(str).value_counts()
     expected_counts, actual_counts = expected_counts.align(actual_counts, fill_value=0)
@@ -77,14 +78,16 @@ def categorical_drift(expected: pd.Series, actual: pd.Series) -> tuple[float, fl
 def build_reference_and_current(
     path: str | Path = DATA_PATH, simulate_shift: bool = True
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Split the dataset into historical/current windows and simulate recent drift."""
+    """Separa la base en ventana historica y ventana reciente para monitoreo."""
     clean_df = clean_data(load_data(path))
     threshold = calculate_low_engagement_threshold(clean_df)
     df = add_features(clean_df, low_engagement_threshold=threshold)
     cutoff = df["signup_month"].median()
+    # Lo historico actua como referencia y lo reciente como ventana actual.
     reference = df[df["signup_month"] <= cutoff].copy()
     current = df[df["signup_month"] > cutoff].copy()
     if simulate_shift:
+        # En modo demo se fuerzan cambios para mostrar un caso claro de drift.
         current = current.copy()
         current["sessions_week"] = (current["sessions_week"] * 0.70).round().astype(int)
         current["avg_session_min"] = (current["avg_session_min"] * 0.80).round(2)
@@ -100,7 +103,7 @@ def build_reference_and_current(
 
 
 def resolve_monitoring_mode(mode: str) -> bool:
-    """Return whether the monitoring run should simulate drift."""
+    """Traduce el modo elegido a si se debe simular drift o no."""
     options = {
         "real": False,
         "simulated": True,
@@ -119,9 +122,10 @@ def detect_drift(
     ks_threshold: float = 0.20,
     js_threshold: float = 0.10,
 ) -> pd.DataFrame:
-    """Compare reference and current populations and flag drift."""
+    """Compara referencia y ventana actual para marcar variables con drift."""
     rows = []
     excluded = {TARGET, "customer_id", "signup_month"}
+    # El target y los identificadores no se monitorean porque no son inputs del modelo.
     for column in [c for c in reference.columns if c not in excluded]:
         if pd.api.types.is_numeric_dtype(reference[column]):
             psi = population_stability_index(reference[column], current[column])
@@ -159,12 +163,13 @@ def generate_monitoring_report(
     path: str | Path = DATA_PATH,
     mode: str = "real",
 ) -> pd.DataFrame:
-    """Create drift reports and prediction samples for operational evidence."""
+    """Genera el reporte de drift y una muestra de predicciones actuales."""
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
     simulate_shift = resolve_monitoring_mode(mode)
     reference, current = build_reference_and_current(path, simulate_shift=simulate_shift)
     load_trained_model()
+    # Se guarda una muestra de predicciones como evidencia de uso operativo.
     predictions = predict_records(current.drop(columns=[TARGET]).head(500).to_dict("records"))
     pd.DataFrame(predictions).to_csv(REPORTS_DIR / "current_predictions_sample.csv", index=False)
 
@@ -183,11 +188,12 @@ def generate_monitoring_report(
 
 
 def streamlit_dashboard() -> None:
-    """Render the Streamlit monitoring view."""
+    """Muestra en Streamlit el dashboard de monitoreo de drift."""
     import streamlit as st
 
     st.set_page_config(page_title="CustomerChurnX Monitoring", layout="wide")
     st.title("CustomerChurnX - Monitoreo de Data Drift")
+    # Permite alternar entre el caso real y un caso demo con drift simulado.
     mode = st.radio(
         "Modo de monitoreo",
         options=["real", "simulated"],

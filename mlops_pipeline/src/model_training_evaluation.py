@@ -1,4 +1,4 @@
-"""Train, evaluate, and persist supervised churn models."""
+"""Entrena, evalua y guarda los modelos supervisados del proyecto."""
 
 from __future__ import annotations
 
@@ -56,7 +56,8 @@ METRICS_PATH = REPORTS_DIR / "metrics_summary.csv"
 
 
 def build_model(model_name: str, preprocessor) -> Pipeline:
-    """Build a full preprocessing plus estimator pipeline."""
+    """Arma un pipeline completo con preprocesamiento mas algoritmo."""
+    # Se prueban tres modelos candidatos para luego elegir el mejor.
     estimators = {
         "logistic_regression": LogisticRegression(
             max_iter=1000,
@@ -89,7 +90,8 @@ def summarize_classification(
     y_pred,
     y_proba,
 ) -> dict[str, float | str]:
-    """Return the core classification metrics required by the PI rubric."""
+    """Calcula las metricas principales para comparar modelos."""
+    # Todas las opciones se evalúan con el mismo conjunto de metricas.
     return {
         "model": model_name,
         "accuracy": accuracy_score(y_true, y_pred),
@@ -101,7 +103,7 @@ def summarize_classification(
 
 
 def train_and_evaluate(data_path: str | Path = DATA_PATH) -> pd.DataFrame:
-    """Train candidate models, choose the best ROC-AUC, and save artifacts."""
+    """Entrena los modelos, elige el mejor por ROC-AUC y guarda artefactos."""
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -110,6 +112,7 @@ def train_and_evaluate(data_path: str | Path = DATA_PATH) -> pd.DataFrame:
     rows = []
     trained_models = {}
 
+    # Todos se entrenan sobre el mismo split para compararlos de forma justa.
     for model_name in model_names:
         model = build_model(model_name, preprocessor)
         model.fit(x_train, y_train)
@@ -121,10 +124,12 @@ def train_and_evaluate(data_path: str | Path = DATA_PATH) -> pd.DataFrame:
     metrics = pd.DataFrame(rows).sort_values("roc_auc", ascending=False)
     metrics.to_csv(METRICS_PATH, index=False)
 
+    # ROC-AUC se usa para elegir el mejor porque el problema es probabilistico.
     best_model_name = metrics.iloc[0]["model"]
     best_model = trained_models[best_model_name]
     joblib.dump(best_model, MODEL_PATH)
 
+    # Estos reportes sirven como evidencia tecnica del PI.
     y_pred = best_model.predict(x_test)
     report = classification_report(y_test, y_pred)
     (REPORTS_DIR / "classification_report.txt").write_text(report, encoding="utf-8")
@@ -139,6 +144,7 @@ def train_and_evaluate(data_path: str | Path = DATA_PATH) -> pd.DataFrame:
         low_engagement_threshold=low_engagement_threshold,
     )
     numerical_columns, categorical_columns = get_feature_columns(full_df)
+    # El schema guarda como se entreno el modelo para reutilizarlo al predecir.
     schema = {
         "target": TARGET,
         "best_model": str(best_model_name),
@@ -155,8 +161,9 @@ def train_and_evaluate(data_path: str | Path = DATA_PATH) -> pd.DataFrame:
 
 
 def load_trained_model(path: str | Path = MODEL_PATH):
-    """Load the persisted model, training it first if needed."""
+    """Carga el modelo guardado y lo entrena si todavia no existe."""
     path = Path(path)
+    # Esto evita que la app falle si los artefactos aun no han sido generados.
     if not path.exists():
         train_and_evaluate()
     return joblib.load(path)

@@ -17,6 +17,7 @@ from model_monitoring import generate_monitoring_report, resolve_monitoring_mode
 
 
 def test_dataset_schema_and_target():
+    """Verifica que la base tenga la estructura minima necesaria."""
     df = clean_data(load_data(PROJECT_DIR / "Base_de_datos.csv"))
     assert TARGET in df.columns
     assert df["customer_id"].is_unique
@@ -24,6 +25,7 @@ def test_dataset_schema_and_target():
 
 
 def test_feature_engineering_creates_expected_columns():
+    """Comprueba que la ingenieria de variables cree las columnas esperadas."""
     df = add_features(clean_data(load_data(PROJECT_DIR / "Base_de_datos.csv")))
     expected = {
         "engagement_minutes_week",
@@ -37,6 +39,7 @@ def test_feature_engineering_creates_expected_columns():
 
 
 def test_low_engagement_flag_uses_reference_threshold():
+    """Valida que el umbral de bajo engagement sea consistente con entrenamiento."""
     df = clean_data(load_data(PROJECT_DIR / "Base_de_datos.csv"))
     threshold = calculate_low_engagement_threshold(df)
     sample = df.head(1).copy()
@@ -49,6 +52,7 @@ def test_low_engagement_flag_uses_reference_threshold():
 
 
 def test_prediction_contract():
+    """Valida la forma minima que debe devolver una prediccion."""
     record = {
         "signup_month": 10,
         "age": 40,
@@ -71,6 +75,7 @@ def test_prediction_contract():
 
 
 def test_monitoring_modes_are_distinct():
+    """Comprueba que el modo real y el modo simulado de monitoreo no se mezclen."""
     real_report = generate_monitoring_report(mode="real")
     simulated_report = generate_monitoring_report(mode="simulated")
 

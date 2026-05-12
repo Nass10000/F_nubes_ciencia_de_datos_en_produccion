@@ -1,4 +1,4 @@
-"""FastAPI deployment entrypoint and batch inference helpers."""
+"""Expone el modelo por API y permite correr predicciones por lote."""
 
 from __future__ import annotations
 
@@ -44,14 +44,14 @@ SCHEMA_PATH = ARTIFACTS_DIR / "feature_schema.json"
 
 
 class PredictionRequest(BaseModel):
-    """Flexible request schema for one or many customer records."""
+    """Define el formato de entrada para uno o varios clientes."""
 
     records: list[dict[str, Any]] | None = None
     record: dict[str, Any] | None = None
 
 
 def load_feature_params() -> dict[str, float]:
-    """Load feature parameters saved during training for inference consistency."""
+    """Carga parametros guardados del entrenamiento para predecir con coherencia."""
     if not SCHEMA_PATH.exists():
         return {}
     schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
@@ -59,6 +59,8 @@ def load_feature_params() -> dict[str, float]:
 
 
 def _prepare_records(records: list[dict[str, Any]]) -> pd.DataFrame:
+    """Normaliza los registros de entrada al formato esperado por el pipeline."""
+    # La idea es que la API trate los datos igual que en entrenamiento.
     df = pd.DataFrame(records)
     if "churn" not in df.columns:
         df["churn"] = 0
@@ -72,11 +74,12 @@ def _prepare_records(records: list[dict[str, Any]]) -> pd.DataFrame:
 
 
 def predict_records(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Return churn prediction and probability for incoming records."""
+    """Devuelve la clase predicha y la probabilidad de churn por registro."""
     if not records:
         raise ValueError("At least one record is required")
     model = load_trained_model()
     prepared = _prepare_records(records)
+    # La clase final se obtiene usando 0.5 como umbral de decision.
     probabilities = model.predict_proba(prepared.drop(columns=["churn", "customer_id"]))[
         :, 1
     ]
@@ -94,7 +97,7 @@ def predict_records(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def batch_predict(input_path: str | Path, output_path: str | Path) -> Path:
-    """Run batch predictions from a CSV file and persist the result."""
+    """Lee un CSV, genera predicciones y guarda el resultado en otro archivo."""
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
     df = load_data(input_path)
     results = predict_records(df.drop(columns=["churn"]).to_dict(orient="records"))
@@ -105,6 +108,7 @@ def batch_predict(input_path: str | Path, output_path: str | Path) -> Path:
 
 
 if FastAPI is not None:
+    # FastAPI publica el modelo como un servicio sencillo de prediccion.
     app = FastAPI(
         title="CustomerChurnX Churn Prediction API",
         version="1.0.0",
@@ -118,7 +122,9 @@ if FastAPI is not None:
     @app.post("/predict")
     @app.post("/prediccion")
     def predict(payload: PredictionRequest) -> dict[str, Any]:
+        """Atiende peticiones de prediccion individual o por lote."""
         try:
+            # El endpoint acepta un solo registro o una lista de registros.
             records = payload.records or ([payload.record] if payload.record else [])
             return {"results": predict_records(records)}
         except Exception as exc:
@@ -128,6 +134,7 @@ else:
 
 
 def main() -> None:
+    """Permite ejecutar prediccion batch desde la terminal."""
     parser = argparse.ArgumentParser(description="Batch inference for CustomerChurnX.")
     parser.add_argument("--input", default=str(DATA_PATH), help="Input CSV path.")
     parser.add_argument(

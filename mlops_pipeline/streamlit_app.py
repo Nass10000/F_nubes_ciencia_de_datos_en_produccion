@@ -1,4 +1,4 @@
-"""Streamlit app for CustomerChurnX predictions and monitoring."""
+"""Interfaz en Streamlit para predecir churn y revisar monitoreo."""
 
 from __future__ import annotations
 
@@ -21,7 +21,8 @@ PLANS = ["Basic", "Plus", "Premium"]
 
 
 def build_customer_record() -> dict:
-    """Render the prediction form and return a model-ready record."""
+    """Construye desde el formulario un registro listo para enviar a prediccion."""
+    # El formulario usa los mismos campos esperados por la API y el modelo.
     left, right = st.columns(2)
     with left:
         signup_month = st.number_input("Mes de registro", 1, 24, 10)
@@ -57,7 +58,8 @@ def build_customer_record() -> dict:
 
 
 def request_api_predictions(records: list[dict]) -> list[dict]:
-    """Call the FastAPI prediction endpoint used by the Docker service."""
+    """Envía registros a la API FastAPI y devuelve las predicciones."""
+    # Streamlit manda el mismo JSON que acepta el endpoint publico.
     payload = json.dumps({"records": records}).encode("utf-8")
     request = Request(
         API_URL,
@@ -71,7 +73,7 @@ def request_api_predictions(records: list[dict]) -> list[dict]:
 
 
 def run_predictions(records: list[dict]) -> tuple[list[dict], str]:
-    """Predict through the API first, then fall back to local inference."""
+    """Intenta predecir por API y, si falla, usa el modelo local."""
     try:
         return request_api_predictions(records), "API FastAPI"
     except (
@@ -82,6 +84,7 @@ def run_predictions(records: list[dict]) -> tuple[list[dict], str]:
         KeyError,
         json.JSONDecodeError,
     ) as exc:
+        # Este respaldo evita que la demo se rompa si la API no esta levantada.
         st.warning(
             f"No se pudo conectar con la API en {API_URL}. "
             f"Se usa el modelo local. Detalle: {exc}"
@@ -90,7 +93,7 @@ def run_predictions(records: list[dict]) -> tuple[list[dict], str]:
 
 
 def render_single_prediction() -> None:
-    """Render single-customer prediction controls and result."""
+    """Muestra el formulario de prediccion individual y su resultado."""
     st.subheader("Prediccion individual")
     record = build_customer_record()
     if st.button("Predecir churn", type="primary"):
@@ -105,12 +108,13 @@ def render_single_prediction() -> None:
 
 
 def render_batch_prediction() -> None:
-    """Render CSV upload prediction workflow."""
+    """Muestra la carga de CSV para generar predicciones por lote."""
     st.subheader("Prediccion por CSV")
     uploaded_file = st.file_uploader("Carga un CSV con columnas del modelo", type=["csv"])
     if uploaded_file is None:
         return
 
+    # Primero se muestra una vista previa para validar el contenido.
     input_df = pd.read_csv(uploaded_file)
     st.dataframe(input_df.head(20), width="stretch")
     if st.button("Predecir archivo CSV"):
@@ -129,8 +133,9 @@ def render_batch_prediction() -> None:
 
 
 def render_monitoring() -> None:
-    """Render drift monitoring controls and result."""
+    """Muestra el panel de monitoreo de drift dentro de la app."""
     st.subheader("Monitoreo de data drift")
+    # La app permite ver tanto el escenario real como el simulado.
     mode = st.radio(
         "Modo de monitoreo",
         options=["real", "simulated"],
@@ -155,6 +160,8 @@ def render_monitoring() -> None:
 
 
 def main() -> None:
+    """Organiza la app en pestañas de prediccion y monitoreo."""
+    # La aplicacion separa claramente inferencia y monitoreo.
     st.set_page_config(page_title="CustomerChurnX", layout="wide")
     st.title("CustomerChurnX")
     prediction_tab, monitoring_tab = st.tabs(["Prediccion", "Monitoreo"])

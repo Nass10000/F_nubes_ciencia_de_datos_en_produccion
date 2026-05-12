@@ -1,4 +1,4 @@
-"""Feature engineering utilities for the CustomerChurnX project."""
+"""Utilidades de limpieza y creacion de variables para CustomerChurnX."""
 
 from __future__ import annotations
 
@@ -24,14 +24,15 @@ RANDOM_STATE = 42
 
 
 def calculate_low_engagement_threshold(df: pd.DataFrame) -> float:
-    """Return the reference weekly engagement threshold for feature creation."""
+    """Calcula el umbral base de engagement semanal usado en las features."""
     engagement_minutes = df["sessions_week"] * df["avg_session_min"]
     return float(engagement_minutes.median())
 
 
 def load_data(path: str | Path = DATA_PATH) -> pd.DataFrame:
-    """Load the project dataset and validate the minimum expected schema."""
+    """Carga la base principal y valida que tenga las columnas obligatorias."""
     df = pd.read_csv(path)
+    # Esta validacion evita seguir el pipeline con una base incorrecta o incompleta.
     required_columns = {
         ID_COLUMN,
         "signup_month",
@@ -56,10 +57,11 @@ def load_data(path: str | Path = DATA_PATH) -> pd.DataFrame:
 
 
 def clean_data(df: pd.DataFrame) -> pd.DataFrame:
-    """Normalize types, remove duplicates, and enforce valid ranges."""
+    """Limpia la base: corrige tipos, elimina duplicados y ajusta rangos validos."""
     clean = df.copy()
     clean = clean.drop_duplicates(subset=[ID_COLUMN]).reset_index(drop=True)
 
+    # Estas columnas se convierten a numericas porque alimentan el modelo.
     numeric_columns = [
         "signup_month",
         "age",
@@ -95,8 +97,9 @@ def clean_data(df: pd.DataFrame) -> pd.DataFrame:
 def add_features(
     df: pd.DataFrame, low_engagement_threshold: float | None = None
 ) -> pd.DataFrame:
-    """Create business-oriented features used by training and inference."""
+    """Crea variables derivadas que ayudan al modelo a detectar churn."""
     features = df.copy()
+    # Estas features resumen uso, soporte y comportamiento de pago del cliente.
     features["engagement_minutes_week"] = (
         features["sessions_week"] * features["avg_session_min"]
     )
@@ -115,7 +118,7 @@ def add_features(
 
 
 def get_feature_columns(df: pd.DataFrame) -> Tuple[list[str], list[str]]:
-    """Return numerical and categorical feature columns for the model."""
+    """Separa las columnas del modelo en numericas y categoricas."""
     excluded = {TARGET, ID_COLUMN}
     candidate_columns = [column for column in df.columns if column not in excluded]
     numerical_columns = [
@@ -130,7 +133,8 @@ def get_feature_columns(df: pd.DataFrame) -> Tuple[list[str], list[str]]:
 def build_preprocessor(
     numerical_columns: list[str], categorical_columns: list[str]
 ) -> ColumnTransformer:
-    """Build a reproducible preprocessing pipeline for mixed data types."""
+    """Construye el preprocesamiento que se aplicara antes de entrenar o predecir."""
+    # Las numericas se imputan y escalan; las categoricas se imputan y codifican.
     numerical_pipeline = Pipeline(
         steps=[
             ("imputer", SimpleImputer(strategy="median")),
@@ -154,7 +158,7 @@ def build_preprocessor(
 def make_training_dataset(
     path: str | Path = DATA_PATH, test_size: float = 0.20
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series, ColumnTransformer]:
-    """Create train/test splits and the preprocessing object."""
+    """Prepara el dataset de entrenamiento y prueba junto al preprocesador."""
     clean_df = clean_data(load_data(path))
     threshold = calculate_low_engagement_threshold(clean_df)
     df = add_features(clean_df, low_engagement_threshold=threshold)
@@ -162,6 +166,7 @@ def make_training_dataset(
     preprocessor = build_preprocessor(numerical_columns, categorical_columns)
     x = df[numerical_columns + categorical_columns]
     y = df[TARGET]
+    # Stratify mantiene la proporcion de churn en train y test.
     return (*train_test_split(
         x,
         y,
@@ -172,11 +177,12 @@ def make_training_dataset(
 
 
 def save_reference_sample(path: str | Path = DATA_PATH) -> Path:
-    """Save a baseline sample used later by the drift monitoring script."""
+    """Guarda una muestra historica que luego se usa como referencia de monitoreo."""
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
     clean_df = clean_data(load_data(path))
     threshold = calculate_low_engagement_threshold(clean_df)
     df = add_features(clean_df, low_engagement_threshold=threshold)
+    # La mitad historica de la base se usa como linea base para drift.
     reference = df[df["signup_month"] <= df["signup_month"].median()].copy()
     output_path = ARTIFACTS_DIR / "reference_sample.csv"
     reference.to_csv(output_path, index=False)
