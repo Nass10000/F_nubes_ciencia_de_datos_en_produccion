@@ -62,6 +62,10 @@ Las metricas no deben interpretarse como un modelo de alto rendimiento. La base 
 
 El mejor modelo fue `logistic_regression`, con `balanced_accuracy = 0.6051` y `ROC-AUC = 0.6628`. Esto indica un desempeno funcional y moderado, por encima de una decision aleatoria, pero todavia mejorable. El resultado es coherente para una entrega academica de MLOps porque el flujo completo funciona, se evita fuga de informacion y se documentan las limitaciones del modelo.
 
+Se eligio `logistic_regression` aunque su `accuracy` es menor porque fue el modelo que mejor balanceo el reconocimiento de las dos clases. En este problema, elegir el modelo con mayor `accuracy` seria enganoso: `gradient_boosting` alcanza `accuracy = 0.9494`, pero su `balanced_accuracy = 0.5076`, muy cerca de una decision que favorece casi siempre la clase mayoritaria. Eso no es conveniente si el objetivo tambien es detectar clientes con riesgo de no pago a tiempo.
+
+Por esa razon, `logistic_regression` no se toma como el modelo "mas bonito" en accuracy, sino como el modelo mas coherente con el objetivo del PI: mantener un flujo funcional, interpretable y menos sesgado hacia la clase mayoritaria.
+
 Para mejorar el desempeno en una version posterior se recomienda probar balanceo de clases, ajuste de umbral, validacion temporal, mas variables disponibles antes de aprobar el credito y modelos como XGBoost.
 
 Artefactos generados:
