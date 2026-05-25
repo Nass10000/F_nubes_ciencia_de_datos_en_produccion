@@ -56,6 +56,14 @@ Para evitar fuga de informacion, el modelo excluye variables que pueden revelar 
 | random_forest | 0.9090 | 0.5609 | 0.9585 | 0.9454 | 0.9519 | 0.6733 |
 | gradient_boosting | 0.9494 | 0.5076 | 0.9533 | 0.9956 | 0.9740 | 0.6831 |
 
+### Interpretacion de las metricas
+
+Las metricas no deben interpretarse como un modelo de alto rendimiento. La base esta fuertemente desbalanceada hacia `Pago_atiempo = 1`, por lo que un modelo puede obtener accuracy alto si predice casi siempre que el credito pagara a tiempo. Por esa razon, el proyecto usa `balanced_accuracy` como metrica principal de seleccion.
+
+El mejor modelo fue `logistic_regression`, con `balanced_accuracy = 0.6051` y `ROC-AUC = 0.6628`. Esto indica un desempeno funcional y moderado, por encima de una decision aleatoria, pero todavia mejorable. El resultado es coherente para una entrega academica de MLOps porque el flujo completo funciona, se evita fuga de informacion y se documentan las limitaciones del modelo.
+
+Para mejorar el desempeno en una version posterior se recomienda probar balanceo de clases, ajuste de umbral, validacion temporal, mas variables disponibles antes de aprobar el credito y modelos como XGBoost.
+
 Artefactos generados:
 
 - `artifacts/best_model.joblib`
