@@ -6,79 +6,89 @@ SRC_DIR = PROJECT_DIR / "src"
 sys.path.insert(0, str(SRC_DIR))
 
 from ft_engineering import (
+    DATE_COLUMN,
+    ID_COLUMN,
     TARGET,
     add_features,
-    calculate_low_engagement_threshold,
     clean_data,
     load_data,
 )
+import model_monitoring
 from model_deploy import predict_records
-from model_monitoring import generate_monitoring_report, resolve_monitoring_mode
+from model_monitoring import resolve_monitoring_mode
 
 
 def test_dataset_schema_and_target():
-    """Verifica que la base tenga la estructura minima necesaria."""
+    """Verifica que la base correcta del PI tenga estructura y objetivo validos."""
     df = clean_data(load_data(PROJECT_DIR / "Base_de_datos.csv"))
+
+    assert len(df) == 10763
+    assert TARGET == "Pago_atiempo"
     assert TARGET in df.columns
-    assert df["customer_id"].is_unique
+    assert ID_COLUMN in df.columns
+    assert df[ID_COLUMN].is_unique
     assert set(df[TARGET].unique()).issubset({0, 1})
+    assert df[DATE_COLUMN].notna().all()
 
 
 def test_feature_engineering_creates_expected_columns():
-    """Comprueba que la ingenieria de variables cree las columnas esperadas."""
+    """Comprueba que la ingenieria financiera cree las columnas del modelo."""
     df = add_features(clean_data(load_data(PROJECT_DIR / "Base_de_datos.csv")))
     expected = {
-        "engagement_minutes_week",
-        "tickets_per_tenure",
-        "late_payment_flag",
-        "high_discount_flag",
-        "early_tenure_flag",
-        "low_engagement_flag",
+        "prestamo_year",
+        "prestamo_month",
+        "cuota_salario_ratio",
+        "capital_salario_ratio",
+        "carga_total_salario_ratio",
+        "capital_por_mes",
+        "mora_ratio",
+        "saldo_principal_ratio",
+        "has_mora",
+        "has_codeudor_mora",
+        "creditos_total",
+        "datacredito_income_gap",
     }
     assert expected.issubset(df.columns)
 
 
-def test_low_engagement_flag_uses_reference_threshold():
-    """Valida que el umbral de bajo engagement sea consistente con entrenamiento."""
-    df = clean_data(load_data(PROJECT_DIR / "Base_de_datos.csv"))
-    threshold = calculate_low_engagement_threshold(df)
-    sample = df.head(1).copy()
-    sample["sessions_week"] = 3
-    sample["avg_session_min"] = 8.5
-
-    featured = add_features(sample, low_engagement_threshold=threshold)
-
-    assert featured["low_engagement_flag"].iloc[0] == 1
-
-
 def test_prediction_contract():
     """Valida la forma minima que debe devolver una prediccion."""
-    record = {
-        "signup_month": 10,
-        "age": 40,
-        "tenure_months": 12,
-        "region": "North",
-        "channel": "web",
-        "plan": "Plus",
-        "sessions_week": 3,
-        "avg_session_min": 8.5,
-        "notif_click_rate": 0.1,
-        "support_tickets_3m": 1,
-        "discount_pct_3m": 0.05,
-        "late_payments_6m": 0,
-        "auto_renew": 1,
-    }
+    df = clean_data(load_data(PROJECT_DIR / "Base_de_datos.csv"))
+    record = (
+        df.drop(columns=[TARGET, ID_COLUMN])
+        .head(1)
+        .assign(fecha_prestamo=lambda data: data[DATE_COLUMN].dt.strftime("%Y-%m-%d"))
+        .to_dict(orient="records")[0]
+    )
+
     result = predict_records([record])[0]
-    assert set(result) == {"customer_id", "prediction", "churn_probability"}
+
+    assert set(result) == {
+        "loan_id",
+        "prediction",
+        "pago_atiempo_probability",
+        "riesgo_no_pago_probability",
+    }
     assert result["prediction"] in {0, 1}
-    assert 0 <= result["churn_probability"] <= 1
+    assert 0 <= result["pago_atiempo_probability"] <= 1
+    assert 0 <= result["riesgo_no_pago_probability"] <= 1
 
 
-def test_monitoring_modes_are_distinct():
+def test_monitoring_modes_are_distinct(tmp_path, monkeypatch):
     """Comprueba que el modo real y el modo simulado de monitoreo no se mezclen."""
-    real_report = generate_monitoring_report(mode="real")
-    simulated_report = generate_monitoring_report(mode="simulated")
+    reports_dir = tmp_path / "reports"
+    artifacts_dir = tmp_path / "artifacts"
+    monkeypatch.setattr(model_monitoring, "REPORTS_DIR", reports_dir)
+    monkeypatch.setattr(model_monitoring, "ARTIFACTS_DIR", artifacts_dir)
+    monkeypatch.setattr(model_monitoring, "DRIFT_REPORT_CSV", reports_dir / "drift_report.csv")
+    monkeypatch.setattr(model_monitoring, "DRIFT_REPORT_JSON", reports_dir / "drift_report.json")
+
+    real_report = model_monitoring.generate_monitoring_report(mode="real")
+    simulated_report = model_monitoring.generate_monitoring_report(mode="simulated")
 
     assert resolve_monitoring_mode("real") is False
     assert resolve_monitoring_mode("simulated") is True
-    assert int(real_report["drift_detected"].sum()) <= int(simulated_report["drift_detected"].sum())
+    assert "drift_detected" in real_report.columns
+    assert int(real_report["drift_detected"].sum()) <= int(
+        simulated_report["drift_detected"].sum()
+    )

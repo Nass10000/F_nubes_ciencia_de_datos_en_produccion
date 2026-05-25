@@ -1,9 +1,10 @@
-"""Interfaz en Streamlit para predecir churn y revisar monitoreo."""
+"""Interfaz Streamlit para prediccion y monitoreo del PI de riesgo crediticio."""
 
 from __future__ import annotations
 
 import json
 import os
+from datetime import date
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
@@ -14,52 +15,72 @@ from src.model_deploy import predict_records
 from src.model_monitoring import generate_monitoring_report
 
 
-API_URL = os.getenv("CUSTOMER_CHURNX_API_URL", "http://127.0.0.1:5000/predict")
-REGIONS = ["North", "South", "East", "West", "Center"]
-CHANNELS = ["web", "store", "app"]
-PLANS = ["Basic", "Plus", "Premium"]
+API_URL = os.getenv("CREDIT_RISK_API_URL", "http://127.0.0.1:5000/predict")
+TIPOS_CREDITO = ["4", "6", "7", "9", "10", "68"]
+TIPOS_LABORALES = ["Empleado", "Independiente"]
+TENDENCIAS_INGRESOS = ["Creciente", "Estable", "Decreciente", "Desconocido"]
 
 
-def build_customer_record() -> dict:
-    """Construye desde el formulario un registro listo para enviar a prediccion."""
-    # El formulario usa los mismos campos esperados por la API y el modelo.
+def build_credit_record() -> dict:
+    """Construye una solicitud de credito con los campos usados por el modelo."""
     left, right = st.columns(2)
     with left:
-        signup_month = st.number_input("Mes de registro", 1, 24, 10)
-        age = st.number_input("Edad", 18, 100, 40)
-        tenure_months = st.number_input("Meses como cliente", 0, 120, 12)
-        region = st.selectbox("Region", REGIONS)
-        channel = st.selectbox("Canal", CHANNELS)
-        plan = st.selectbox("Plan", PLANS, index=1)
+        tipo_credito = st.selectbox("Tipo de credito", TIPOS_CREDITO)
+        fecha_prestamo = st.date_input("Fecha del prestamo", value=date(2025, 6, 1))
+        capital_prestado = st.number_input("Capital prestado", 0.0, 100_000_000.0, 3_500_000.0)
+        plazo_meses = st.number_input("Plazo en meses", 1, 120, 12)
+        edad_cliente = st.number_input("Edad del cliente", 18, 100, 40)
+        tipo_laboral = st.selectbox("Tipo laboral", TIPOS_LABORALES)
+        salario_cliente = st.number_input("Salario del cliente", 0.0, 100_000_000.0, 3_000_000.0)
+        total_otros_prestamos = st.number_input(
+            "Total otros prestamos", 0.0, 100_000_000.0, 500_000.0
+        )
+        cuota_pactada = st.number_input("Cuota pactada", 0.0, 20_000_000.0, 300_000.0)
+        puntaje = st.number_input("Puntaje interno", 0.0, 100.0, 80.0)
+        puntaje_datacredito = st.number_input("Puntaje Datacredito", 0.0, 1000.0, 720.0)
     with right:
-        sessions_week = st.number_input("Sesiones por semana", 0, 50, 3)
-        avg_session_min = st.number_input("Minutos promedio por sesion", 0.0, 120.0, 8.5)
-        notif_click_rate = st.slider("Tasa de clic en notificaciones", 0.0, 1.0, 0.10)
-        support_tickets_3m = st.number_input("Tickets soporte ultimos 3 meses", 0, 20, 1)
-        discount_pct_3m = st.slider("Descuento ultimos 3 meses", 0.0, 1.0, 0.05)
-        late_payments_6m = st.number_input("Pagos atrasados ultimos 6 meses", 0, 12, 0)
-        auto_renew = st.checkbox("Renovacion automatica", value=True)
+        cant_creditosvigentes = st.number_input("Creditos vigentes", 0, 100, 3)
+        huella_consulta = st.number_input("Consultas recientes", 0, 100, 2)
+        saldo_mora = st.number_input("Saldo en mora", 0.0, 100_000_000.0, 0.0)
+        saldo_total = st.number_input("Saldo total", 0.0, 100_000_000.0, 50_000.0)
+        saldo_principal = st.number_input("Saldo principal", 0.0, 100_000_000.0, 50_000.0)
+        saldo_mora_codeudor = st.number_input("Mora codeudor", 0.0, 100_000_000.0, 0.0)
+        creditos_sector_financiero = st.number_input("Creditos sector financiero", 0, 100, 2)
+        creditos_sector_cooperativo = st.number_input("Creditos sector cooperativo", 0, 100, 0)
+        creditos_sector_real = st.number_input("Creditos sector real", 0, 100, 1)
+        promedio_ingresos_datacredito = st.number_input(
+            "Promedio ingresos Datacredito", 0.0, 100_000_000.0, 2_800_000.0
+        )
+        tendencia_ingresos = st.selectbox("Tendencia de ingresos", TENDENCIAS_INGRESOS)
 
     return {
-        "signup_month": int(signup_month),
-        "age": int(age),
-        "tenure_months": int(tenure_months),
-        "region": region,
-        "channel": channel,
-        "plan": plan,
-        "sessions_week": int(sessions_week),
-        "avg_session_min": float(avg_session_min),
-        "notif_click_rate": float(notif_click_rate),
-        "support_tickets_3m": int(support_tickets_3m),
-        "discount_pct_3m": float(discount_pct_3m),
-        "late_payments_6m": int(late_payments_6m),
-        "auto_renew": int(auto_renew),
+        "tipo_credito": tipo_credito,
+        "fecha_prestamo": fecha_prestamo.isoformat(),
+        "capital_prestado": float(capital_prestado),
+        "plazo_meses": int(plazo_meses),
+        "edad_cliente": int(edad_cliente),
+        "tipo_laboral": tipo_laboral,
+        "salario_cliente": float(salario_cliente),
+        "total_otros_prestamos": float(total_otros_prestamos),
+        "cuota_pactada": float(cuota_pactada),
+        "puntaje": float(puntaje),
+        "puntaje_datacredito": float(puntaje_datacredito),
+        "cant_creditosvigentes": int(cant_creditosvigentes),
+        "huella_consulta": int(huella_consulta),
+        "saldo_mora": float(saldo_mora),
+        "saldo_total": float(saldo_total),
+        "saldo_principal": float(saldo_principal),
+        "saldo_mora_codeudor": float(saldo_mora_codeudor),
+        "creditos_sectorFinanciero": int(creditos_sector_financiero),
+        "creditos_sectorCooperativo": int(creditos_sector_cooperativo),
+        "creditos_sectorReal": int(creditos_sector_real),
+        "promedio_ingresos_datacredito": float(promedio_ingresos_datacredito),
+        "tendencia_ingresos": tendencia_ingresos,
     }
 
 
 def request_api_predictions(records: list[dict]) -> list[dict]:
-    """Envía registros a la API FastAPI y devuelve las predicciones."""
-    # Streamlit manda el mismo JSON que acepta el endpoint publico.
+    """Envia registros a FastAPI y devuelve sus predicciones."""
     payload = json.dumps({"records": records}).encode("utf-8")
     request = Request(
         API_URL,
@@ -73,7 +94,7 @@ def request_api_predictions(records: list[dict]) -> list[dict]:
 
 
 def run_predictions(records: list[dict]) -> tuple[list[dict], str]:
-    """Intenta predecir por API y, si falla, usa el modelo local."""
+    """Usa FastAPI si esta disponible; si no, predice con el modelo local."""
     try:
         return request_api_predictions(records), "API FastAPI"
     except (
@@ -84,7 +105,6 @@ def run_predictions(records: list[dict]) -> tuple[list[dict], str]:
         KeyError,
         json.JSONDecodeError,
     ) as exc:
-        # Este respaldo evita que la demo se rompa si la API no esta levantada.
         st.warning(
             f"No se pudo conectar con la API en {API_URL}. "
             f"Se usa el modelo local. Detalle: {exc}"
@@ -93,32 +113,37 @@ def run_predictions(records: list[dict]) -> tuple[list[dict], str]:
 
 
 def render_single_prediction() -> None:
-    """Muestra el formulario de prediccion individual y su resultado."""
+    """Muestra el formulario principal de prediccion individual."""
     st.subheader("Prediccion individual")
-    record = build_customer_record()
-    if st.button("Predecir churn", type="primary"):
+    record = build_credit_record()
+    if st.button("Predecir pago", type="primary"):
         predictions, source = run_predictions([record])
         result = predictions[0]
-        probability = result["churn_probability"]
-        prediction_text = "Riesgo de churn" if result["prediction"] == 1 else "Sin churn esperado"
+        pago_prob = result["pago_atiempo_probability"]
+        riesgo_prob = result["riesgo_no_pago_probability"]
+        prediction_text = (
+            "Pago a tiempo esperado" if result["prediction"] == 1 else "Riesgo de no pago"
+        )
         st.caption(f"Origen de la prediccion: {source}")
         st.metric("Resultado", prediction_text)
-        st.metric("Probabilidad de churn", f"{probability:.2%}")
+        st.metric("Probabilidad de pago a tiempo", f"{pago_prob:.2%}")
+        st.metric("Riesgo de no pago", f"{riesgo_prob:.2%}")
         st.json({"entrada": record, "salida": result})
 
 
 def render_batch_prediction() -> None:
-    """Muestra la carga de CSV para generar predicciones por lote."""
+    """Permite subir un CSV y generar predicciones por lote."""
     st.subheader("Prediccion por CSV")
     uploaded_file = st.file_uploader("Carga un CSV con columnas del modelo", type=["csv"])
     if uploaded_file is None:
         return
 
-    # Primero se muestra una vista previa para validar el contenido.
     input_df = pd.read_csv(uploaded_file)
     st.dataframe(input_df.head(20), width="stretch")
     if st.button("Predecir archivo CSV"):
-        records = input_df.drop(columns=["churn"], errors="ignore").to_dict(orient="records")
+        records = input_df.drop(columns=["Pago_atiempo"], errors="ignore").to_dict(
+            orient="records"
+        )
         prediction_records, source = run_predictions(records)
         st.caption(f"Origen de la prediccion: {source}")
         predictions = pd.DataFrame(prediction_records)
@@ -127,15 +152,14 @@ def render_batch_prediction() -> None:
         st.download_button(
             "Descargar predicciones",
             data=csv,
-            file_name="predicciones_churn.csv",
+            file_name="predicciones_credito.csv",
             mime="text/csv",
         )
 
 
 def render_monitoring() -> None:
-    """Muestra el panel de monitoreo de drift dentro de la app."""
+    """Muestra las metricas de data drift del avance 3."""
     st.subheader("Monitoreo de data drift")
-    # La app permite ver tanto el escenario real como el simulado.
     mode = st.radio(
         "Modo de monitoreo",
         options=["real", "simulated"],
@@ -146,13 +170,12 @@ def render_monitoring() -> None:
     report = generate_monitoring_report(mode=mode)
     drift_count = int(report["drift_detected"].sum())
     if mode == "real":
-        st.caption("Compara ventanas reales de la base sin introducir cambios artificiales.")
+        st.caption("Compara la ventana historica contra la ventana reciente de la base.")
     else:
-        st.caption("Modo de demostracion: fuerza cambios en variables clave para evidenciar drift.")
+        st.caption("Altera variables de forma controlada para demostrar deteccion de drift.")
     st.metric("Variables con drift", drift_count)
     st.dataframe(report.round(4), width="stretch")
-    chart_data = report.set_index("feature")["psi"].fillna(0).sort_values(ascending=False)
-    st.bar_chart(chart_data)
+    st.bar_chart(report.set_index("feature")["psi"].fillna(0).sort_values(ascending=False))
     if drift_count:
         st.warning("Se recomienda revisar el pipeline y evaluar reentrenamiento.")
     else:
@@ -160,10 +183,9 @@ def render_monitoring() -> None:
 
 
 def main() -> None:
-    """Organiza la app en pestañas de prediccion y monitoreo."""
-    # La aplicacion separa claramente inferencia y monitoreo.
-    st.set_page_config(page_title="CustomerChurnX", layout="wide")
-    st.title("CustomerChurnX")
+    """Organiza la app en pestanas para prediccion y monitoreo."""
+    st.set_page_config(page_title="PI Riesgo Crediticio", layout="wide")
+    st.title("PI Riesgo Crediticio")
     prediction_tab, monitoring_tab = st.tabs(["Prediccion", "Monitoreo"])
     with prediction_tab:
         render_single_prediction()

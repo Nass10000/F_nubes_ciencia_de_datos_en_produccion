@@ -14,10 +14,12 @@ try:
     from ft_engineering import (
         ARTIFACTS_DIR,
         DATA_PATH,
+        DATE_COLUMN,
+        ID_COLUMN,
+        MODEL_EXCLUDED_COLUMNS,
         REPORTS_DIR,
         TARGET,
         add_features,
-        calculate_low_engagement_threshold,
         clean_data,
         load_data,
     )
@@ -27,10 +29,12 @@ except ImportError:
     from .ft_engineering import (
         ARTIFACTS_DIR,
         DATA_PATH,
+        DATE_COLUMN,
+        ID_COLUMN,
+        MODEL_EXCLUDED_COLUMNS,
         REPORTS_DIR,
         TARGET,
         add_features,
-        calculate_low_engagement_threshold,
         clean_data,
         load_data,
     )
@@ -79,26 +83,19 @@ def build_reference_and_current(
     path: str | Path = DATA_PATH, simulate_shift: bool = True
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Separa la base en ventana historica y ventana reciente para monitoreo."""
-    clean_df = clean_data(load_data(path))
-    threshold = calculate_low_engagement_threshold(clean_df)
-    df = add_features(clean_df, low_engagement_threshold=threshold)
-    cutoff = df["signup_month"].median()
+    df = add_features(clean_data(load_data(path)))
+    cutoff = df[DATE_COLUMN].median()
     # Lo historico actua como referencia y lo reciente como ventana actual.
-    reference = df[df["signup_month"] <= cutoff].copy()
-    current = df[df["signup_month"] > cutoff].copy()
+    reference = df[df[DATE_COLUMN] <= cutoff].copy()
+    current = df[df[DATE_COLUMN] > cutoff].copy()
     if simulate_shift:
         # En modo demo se fuerzan cambios para mostrar un caso claro de drift.
         current = current.copy()
-        current["sessions_week"] = (current["sessions_week"] * 0.70).round().astype(int)
-        current["avg_session_min"] = (current["avg_session_min"] * 0.80).round(2)
-        current["support_tickets_3m"] = (current["support_tickets_3m"] + 1).clip(upper=6)
-        current["discount_pct_3m"] = (current["discount_pct_3m"] * 1.35).clip(upper=1)
-        current["low_engagement_flag"] = (
-            current["sessions_week"] * current["avg_session_min"] < threshold
-        ).astype(int)
-        current["engagement_minutes_week"] = (
-            current["sessions_week"] * current["avg_session_min"]
-        )
+        current["salario_cliente"] = (current["salario_cliente"] * 0.75).round()
+        current["puntaje_datacredito"] = (current["puntaje_datacredito"] * 0.90).round()
+        current["saldo_mora"] = (current["saldo_mora"].fillna(0) + 250000).clip(lower=0)
+        current["huella_consulta"] = (current["huella_consulta"] + 3).clip(lower=0)
+        current = add_features(current)
     return reference, current
 
 
@@ -124,12 +121,16 @@ def detect_drift(
 ) -> pd.DataFrame:
     """Compara referencia y ventana actual para marcar variables con drift."""
     rows = []
-    excluded = {TARGET, "customer_id", "signup_month"}
-    # El target y los identificadores no se monitorean porque no son inputs del modelo.
-    for column in [c for c in reference.columns if c not in excluded]:
+    # Solo se monitorean variables de entrada reales; se excluyen target, IDs y fugas.
+    for column in [c for c in reference.columns if c not in MODEL_EXCLUDED_COLUMNS]:
         if pd.api.types.is_numeric_dtype(reference[column]):
             psi = population_stability_index(reference[column], current[column])
-            ks_stat, ks_p_value = ks_2samp(reference[column], current[column])
+            reference_values = reference[column].dropna()
+            current_values = current[column].dropna()
+            if reference_values.empty or current_values.empty:
+                ks_stat, ks_p_value = 0.0, 1.0
+            else:
+                ks_stat, ks_p_value = ks_2samp(reference_values, current_values)
             rows.append(
                 {
                     "feature": column,
@@ -175,12 +176,13 @@ def generate_monitoring_report(
 
     report = detect_drift(reference, current)
     report.to_csv(DRIFT_REPORT_CSV, index=False)
+    summary_records = json.loads(report.to_json(orient="records"))
     payload = {
         "mode": mode,
         "reference_rows": int(len(reference)),
         "current_rows": int(len(current)),
         "drifted_features": report.loc[report["drift_detected"], "feature"].tolist(),
-        "summary": report.to_dict(orient="records"),
+        "summary": summary_records,
     }
     DRIFT_REPORT_JSON.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     reference.to_csv(ARTIFACTS_DIR / "reference_sample.csv", index=False)
@@ -191,8 +193,8 @@ def streamlit_dashboard() -> None:
     """Muestra en Streamlit el dashboard de monitoreo de drift."""
     import streamlit as st
 
-    st.set_page_config(page_title="CustomerChurnX Monitoring", layout="wide")
-    st.title("CustomerChurnX - Monitoreo de Data Drift")
+    st.set_page_config(page_title="Riesgo crediticio - Monitoring", layout="wide")
+    st.title("Riesgo crediticio - Monitoreo de Data Drift")
     # Permite alternar entre el caso real y un caso demo con drift simulado.
     mode = st.radio(
         "Modo de monitoreo",

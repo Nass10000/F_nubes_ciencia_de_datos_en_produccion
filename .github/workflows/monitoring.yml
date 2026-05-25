@@ -1,0 +1,45 @@
+name: mlops-monitoring
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 12 * * 1"
+
+jobs:
+  drift-report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r mlops_pipeline/requirements.txt
+      - name: Train model
+        run: python mlops_pipeline/src/model_training_evaluation.py
+      - name: Generate drift report
+        run: python mlops_pipeline/src/model_monitoring.py
+      - name: Summarize drift
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          report = json.loads(Path("mlops_pipeline/reports/drift_report.json").read_text())
+          drifted = report["drifted_features"]
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary:
+              summary.write("# Data drift report\\n\\n")
+              summary.write(f"Mode: {report['mode']}\\n\\n")
+              summary.write(f"Reference rows: {report['reference_rows']}\\n\\n")
+              summary.write(f"Current rows: {report['current_rows']}\\n\\n")
+              summary.write(f"Drifted features: {len(drifted)}\\n\\n")
+              for feature in drifted:
+                  summary.write(f"- {feature}\\n")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: drift-reports
+          path: |
+            mlops_pipeline/reports/drift_report.csv
+            mlops_pipeline/reports/drift_report.json

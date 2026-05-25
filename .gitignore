@@ -1,2 +1,9 @@
 lectures_txt/
 materials/
+mlops_pipeline/Base_de_datos.xlsx
+mlops_pipeline/Base_de_datos_correcta.csv
+mlops_pipeline/streamlit_*.log
+streamlit_*.log
+__pycache__/
+.pytest_cache/
+.ipynb_checkpoints/

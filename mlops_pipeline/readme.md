@@ -1,6 +1,8 @@
-# CustomerChurnX - PI M5
+# PI M5 - Riesgo crediticio
 
-Proyecto integrador de Fundamentos de nube y ciencia de datos en produccion. El objetivo es predecir el churn de clientes usando datos historicos y dejar un flujo reproducible con carga, EDA, feature engineering, entrenamiento, despliegue y monitoreo.
+Este repositorio contiene el Proyecto Integrador del modulo de Fundamentos de nube y ciencia de datos en produccion. El caso es financiero: a partir de informacion historica de creditos se entrena un modelo para estimar si una solicitud tendra `Pago_atiempo`.
+
+La base usada por el proyecto es `Base_de_datos.csv`, con 10,763 registros y 23 columnas originales.
 
 ## Estructura
 
@@ -15,17 +17,103 @@ mlops_pipeline/
     model_monitoring.py
   Base_de_datos.csv
   requirements.txt
-  .gitignore
+  Dockerfile
+  tests/
+  artifacts/
+  reports/
   readme.md
 ```
 
-Tambien se incluyen `Dockerfile`, `.dockerignore`, `tests/`, `artifacts/` y `reports/` para cubrir despliegue, validacion y evidencia tecnica.
+## Avance 1 - Versionamiento y EDA
 
-## Caso de Negocio
+Se completo la estructura solicitada, el archivo `requirements.txt` y los notebooks:
 
-CustomerChurnX necesita anticipar que clientes tienen mayor probabilidad de abandonar el servicio. La variable objetivo es `churn`, y las senales disponibles incluyen antiguedad, plan, canal, region, uso semanal, tickets de soporte, descuentos, mora y renovacion automatica.
+- `src/Cargar_datos.ipynb`: carga la base, valida columnas obligatorias, revisa nulos, duplicados, tipos y distribucion de `Pago_atiempo`.
+- `src/comprension_eda.ipynb`: desarrolla EDA inicial, univariable, bivariable y multivariable. Tambien documenta variables categoricas, numericas, ordinales, nominales, dicotomicas y politomicas, reglas de validacion y features sugeridas.
 
-## Instalacion
+La limpieza unifica nulos, convierte `fecha_prestamo` desde serial de Excel a fecha real, corrige tipos numericos y crea `loan_id` como identificador tecnico.
+
+## Avance 2 - Feature Engineering y Modelado
+
+`src/ft_engineering.py` crea las variables derivadas y el preprocesamiento:
+
+- `cuota_salario_ratio`
+- `capital_salario_ratio`
+- `otros_prestamos_salario_ratio`
+- `carga_total_salario_ratio`
+- `capital_por_mes`
+- `creditos_total`
+- `datacredito_income_gap`
+- `prestamo_year` y `prestamo_month`
+
+Para evitar fuga de informacion, el modelo excluye variables que pueden revelar el resultado despues del credito, como `puntaje`, `saldo_mora`, `saldo_total`, `saldo_principal`, `saldo_mora_codeudor` y sus derivados de mora.
+
+`src/model_training_evaluation.py` compara Logistic Regression, Random Forest y Gradient Boosting. Debido al desbalance de la clase objetivo, el mejor modelo se selecciona por `balanced_accuracy`.
+
+| Modelo | Accuracy | Balanced Accuracy | Precision | Recall | F1 | ROC-AUC |
+|---|---:|---:|---:|---:|---:|---:|
+| logistic_regression | 0.6470 | 0.6051 | 0.9674 | 0.6514 | 0.7786 | 0.6628 |
+| random_forest | 0.9090 | 0.5609 | 0.9585 | 0.9454 | 0.9519 | 0.6733 |
+| gradient_boosting | 0.9494 | 0.5076 | 0.9533 | 0.9956 | 0.9740 | 0.6831 |
+
+Artefactos generados:
+
+- `artifacts/best_model.joblib`
+- `artifacts/feature_schema.json`
+- `artifacts/reference_sample.csv`
+- `reports/metrics_summary.csv`
+- `reports/classification_report.txt`
+- `reports/confusion_matrix.csv`
+
+## Avance 3 - Monitoreo y Streamlit
+
+`src/model_monitoring.py` compara una ventana historica contra una ventana reciente y calcula:
+
+- PSI para variables numericas.
+- Kolmogorov-Smirnov para variables numericas.
+- Jensen-Shannon y chi-cuadrado para variables categoricas.
+
+Los reportes quedan en:
+
+- `reports/drift_report.csv`
+- `reports/drift_report.json`
+- `reports/current_predictions_sample.csv`
+
+La aplicacion `streamlit_app.py` tiene dos pestanas:
+
+- `Prediccion`: formulario individual y carga CSV por lote.
+- `Monitoreo`: tabla y grafico de data drift en modo real o simulado.
+
+Tambien se incluye `.github/workflows/monitoring.yml` para ejecutar el reporte de drift de forma programada o manual desde GitHub Actions.
+
+## Avance 4 - API, Docker y Prediccion Batch
+
+`src/model_deploy.py` expone el modelo con FastAPI:
+
+- `GET /health`
+- `POST /predict`
+- `POST /prediccion`
+
+Tambien permite prediccion por lote desde terminal:
+
+```bash
+python src/model_deploy.py --input Base_de_datos.csv --output reports/batch_predictions.csv
+```
+
+El `Dockerfile` empaqueta dependencias, codigo, modelo y API con Uvicorn.
+
+```bash
+docker build -t pi-riesgo-crediticio .
+docker run --rm -p 5000:5000 pi-riesgo-crediticio
+```
+
+Con la API activa, la documentacion Swagger queda disponible en:
+
+```text
+http://127.0.0.1:5000/docs
+```
+
+## Instalacion local
 
 ```bash
 cd mlops_pipeline
@@ -41,67 +129,29 @@ python src/ft_engineering.py
 python src/model_training_evaluation.py
 python src/model_deploy.py --input Base_de_datos.csv --output reports/batch_predictions.csv
 python src/model_monitoring.py
-```
-
-## Resultados de Modelado
-
-Se compararon Logistic Regression, Random Forest y Gradient Boosting. El mejor modelo por ROC-AUC fue `logistic_regression`.
-
-| Modelo | Accuracy | Precision | Recall | F1 | ROC-AUC |
-|---|---:|---:|---:|---:|---:|
-| logistic_regression | 0.639 | 0.373 | 0.701 | 0.486 | 0.726 |
-| random_forest | 0.695 | 0.412 | 0.582 | 0.482 | 0.709 |
-| gradient_boosting | 0.753 | 0.483 | 0.172 | 0.254 | 0.701 |
-
-El modelo se guarda en `artifacts/best_model.joblib` y las metricas en `reports/metrics_summary.csv`.
-
-## API y Docker
-
-La API expone:
-
-- `GET /health`
-- `POST /predict`
-- `POST /prediccion`
-
-Ejemplo Docker:
-
-```bash
-docker build -t customer-churnx .
-docker run --rm -p 5000:5000 customer-churnx
-```
-
-Con `-p 5000:5000`, el puerto del host coincide con el puerto interno de Uvicorn. Con `-p 8000:5000`, la API queda disponible en el host por el puerto 8000. Con `-p 5000:8000`, no funcionara si la app sigue escuchando internamente en 5000.
-
-## Streamlit
-
-La app web permite cargar datos de un cliente, predecir su probabilidad de churn, cargar un CSV para prediccion batch y revisar monitoreo de drift.
-Por defecto consume la API en `http://127.0.0.1:5000/predict`; se puede cambiar con la variable `CUSTOMER_CHURNX_API_URL`.
-
-```bash
 streamlit run streamlit_app.py
 ```
 
-## Monitoreo
-
-`model_monitoring.py` compara una ventana historica contra una ventana reciente. En modo `real` usa la base tal como esta; en modo `simulated` introduce cambios controlados para demostrar drift. Calcula PSI, KS, chi-cuadrado y Jensen-Shannon. El reporte queda en:
-
-- `reports/drift_report.csv`
-- `reports/drift_report.json`
-
-En la corrida validada en modo `real` no se detecto drift fuerte. En modo `simulated` se detectan: `low_engagement_flag`, `sessions_week`, `avg_session_min`, `support_tickets_3m` y `engagement_minutes_week`.
-
-Para abrir solo el dashboard de monitoreo desde el modulo:
+## Pruebas
 
 ```bash
-streamlit run src/model_monitoring.py
+pytest -q tests
 ```
+
+Los tests validan:
+
+- esquema y objetivo `Pago_atiempo`;
+- cantidad correcta de registros;
+- columnas creadas por feature engineering;
+- contrato de salida de prediccion;
+- modos de monitoreo real y simulado.
 
 ## Gitflow
 
-El repositorio debe tener tres ramas:
+El flujo esperado del PI usa tres ramas:
 
-- `developer`: desarrollo y cambios principales.
-- `certification`: version validada antes de produccion.
-- `master`: entrega estable final.
+- `developer`: desarrollo activo.
+- `certification`: validacion antes de entrega estable.
+- `master`: version final estable.
 
-La estructura base representa `V1.0.0`; los notebooks `V1.0.1`; feature engineering y modelado `V1.1.0`; monitoreo y despliegue cubren los avances posteriores.
+Los archivos `lectures_txt/` y `materials/` estan ignorados para que no se suban al repositorio.

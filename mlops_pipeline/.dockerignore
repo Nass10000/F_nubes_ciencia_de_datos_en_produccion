@@ -7,6 +7,9 @@ env/
 mlruns/
 reports/tmp/
 artifacts/tmp/
+Base_de_datos.xlsx
+Base_de_datos_correcta.csv
+streamlit_*.log
 lectures_txt/
 materials/
 .git/

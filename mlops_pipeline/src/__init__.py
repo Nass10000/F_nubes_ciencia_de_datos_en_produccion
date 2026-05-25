@@ -1,1 +1,1 @@
-"""CustomerChurnX MLOps pipeline package."""
+"""Pipeline MLOps del PI de riesgo crediticio."""

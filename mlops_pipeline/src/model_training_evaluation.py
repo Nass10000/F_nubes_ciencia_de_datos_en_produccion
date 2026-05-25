@@ -13,6 +13,7 @@ from sklearn.metrics import (
     accuracy_score,
     classification_report,
     confusion_matrix,
+    balanced_accuracy_score,
     f1_score,
     precision_score,
     recall_score,
@@ -27,7 +28,6 @@ try:
         REPORTS_DIR,
         TARGET,
         add_features,
-        calculate_low_engagement_threshold,
         clean_data,
         get_feature_columns,
         load_data,
@@ -41,7 +41,6 @@ except ImportError:
         REPORTS_DIR,
         TARGET,
         add_features,
-        calculate_low_engagement_threshold,
         clean_data,
         get_feature_columns,
         load_data,
@@ -95,6 +94,7 @@ def summarize_classification(
     return {
         "model": model_name,
         "accuracy": accuracy_score(y_true, y_pred),
+        "balanced_accuracy": balanced_accuracy_score(y_true, y_pred),
         "precision": precision_score(y_true, y_pred, zero_division=0),
         "recall": recall_score(y_true, y_pred, zero_division=0),
         "f1": f1_score(y_true, y_pred, zero_division=0),
@@ -103,7 +103,7 @@ def summarize_classification(
 
 
 def train_and_evaluate(data_path: str | Path = DATA_PATH) -> pd.DataFrame:
-    """Entrena los modelos, elige el mejor por ROC-AUC y guarda artefactos."""
+    """Entrena los modelos, elige el mejor por balanced accuracy y guarda artefactos."""
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -121,10 +121,12 @@ def train_and_evaluate(data_path: str | Path = DATA_PATH) -> pd.DataFrame:
         rows.append(summarize_classification(model_name, y_test, y_pred, y_proba))
         trained_models[model_name] = model
 
-    metrics = pd.DataFrame(rows).sort_values("roc_auc", ascending=False)
+    metrics = pd.DataFrame(rows).sort_values(
+        ["balanced_accuracy", "roc_auc"], ascending=False
+    )
     metrics.to_csv(METRICS_PATH, index=False)
 
-    # ROC-AUC se usa para elegir el mejor porque el problema es probabilistico.
+    # Balanced accuracy evita elegir un modelo que ignore la clase minoritaria.
     best_model_name = metrics.iloc[0]["model"]
     best_model = trained_models[best_model_name]
     joblib.dump(best_model, MODEL_PATH)
@@ -137,20 +139,13 @@ def train_and_evaluate(data_path: str | Path = DATA_PATH) -> pd.DataFrame:
         REPORTS_DIR / "confusion_matrix.csv", index=False
     )
 
-    clean_df = clean_data(load_data(data_path))
-    low_engagement_threshold = calculate_low_engagement_threshold(clean_df)
-    full_df = add_features(
-        clean_df,
-        low_engagement_threshold=low_engagement_threshold,
-    )
+    full_df = add_features(clean_data(load_data(data_path)))
     numerical_columns, categorical_columns = get_feature_columns(full_df)
     # El schema guarda como se entreno el modelo para reutilizarlo al predecir.
     schema = {
         "target": TARGET,
         "best_model": str(best_model_name),
-        "feature_params": {
-            "low_engagement_threshold": low_engagement_threshold,
-        },
+        "selection_metric": "balanced_accuracy",
         "numerical_columns": numerical_columns,
         "categorical_columns": categorical_columns,
         "input_columns": numerical_columns + categorical_columns,
